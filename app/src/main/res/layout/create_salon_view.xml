@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -11,7 +17,7 @@
         <com.google.android.gms.maps.MapView
             android:id="@+id/create_salon_map"
             android:layout_width="0dp"
-            android:layout_height="400dp"
+            android:layout_height="200dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -19,13 +25,13 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="36dp"
             app:layout_constraintBottom_toBottomOf="@+id/create_salon_map"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_mylocation" />
+            app:srcCompat="@drawable/ic_location" />
 
         <EditText
             android:id="@+id/create_salon_name"
@@ -103,3 +109,4 @@
                 app:layout_constraintTop_toBottomOf="@+id/create_salon_name" />
 
     </android.support.constraint.ConstraintLayout>
+</ScrollView>

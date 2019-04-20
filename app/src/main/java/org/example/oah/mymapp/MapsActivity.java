@@ -173,6 +173,7 @@ public class MapsActivity extends AppCompatActivity
         // 59.436375  24.756952 viru
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.436375,24.756952),15));
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();

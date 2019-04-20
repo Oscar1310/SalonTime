@@ -45,4 +45,5 @@
     <string name="female_avarge_price_text">Female avarege price €</string>
     <string name="heading_text">Heading</string>
     <string name="phone_number_text">+372 56 929 117</string>
+    <string name="set_location_text">Set Location</string>
 </resources>
