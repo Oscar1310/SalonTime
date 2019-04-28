@@ -72,7 +72,7 @@ public class SalonsListFragment extends Fragment {
         Log.d(TAG, "getUserSalonsData: called");
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("salons");
+        DatabaseReference myRef = database.getReference("Salons");
 
         myRef.orderByChild("createdUser").equalTo("b7UoljcSmsdk2ca1oJ7bOCkiM4u2").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

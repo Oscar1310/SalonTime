@@ -73,26 +73,26 @@ public class AddEditSalonFragment extends Fragment
                 String malePrice = salonMaleAveragPrice.getText().toString();
                 String femalePrice = femaleAveragePrice.getText().toString();
 
-                Boolean allOkeiForSaving = true;
+                Boolean allOkeyForSaving = true;
 
                 if (name.equals("")) {
                     salonName.setError("Salon name require");
-                    allOkeiForSaving = false;
+                    allOkeyForSaving = false;
                 }
                 if (phone.equals("")) {
                     salonPhoneNumber.setError("Phone number require");
-                    allOkeiForSaving = false;
+                    allOkeyForSaving = false;
                 }
                 if (malePrice.equals("")) {
                     salonMaleAveragPrice.setError("Male price require");
-                    allOkeiForSaving = false;
+                    allOkeyForSaving = false;
                 }
                 if (femalePrice.equals("")) {
                     femaleAveragePrice.setError("Female price require");
-                    allOkeiForSaving = false;
+                    allOkeyForSaving = false;
                 }
 
-                if (allOkeiForSaving) {
+                if (allOkeyForSaving) {
                     Salon salon = new Salon(name, description, salonLat,
                     salonLon, phone, malePrice, femalePrice, createdUser);
                     Log.d(TAG, "save salon: " + salon.toString());

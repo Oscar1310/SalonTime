@@ -177,7 +177,7 @@ public class MapsActivity extends AppCompatActivity
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("salons");
+        DatabaseReference myRef = database.getReference("Salons");
 
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

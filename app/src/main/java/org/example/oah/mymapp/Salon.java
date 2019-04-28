@@ -58,7 +58,7 @@ public class Salon implements Serializable {
 
     public void save() {
         Log.d(TAG, "Salon save: " + this.name);
-        mDatabase = FirebaseDatabase.getInstance().getReference("salons");
+        mDatabase = FirebaseDatabase.getInstance().getReference("Salons");
         mDatabase.child(this.id).setValue(this);
     }
 
