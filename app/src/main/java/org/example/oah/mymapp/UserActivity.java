@@ -21,7 +21,10 @@ public class UserActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_user:
-                    mTextMessage.setText(R.string.title_home);
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.user_fragment_container, new UserViewFragment())
+                            .commit();
                     return true;
                 case R.id.navigation_salons:
                     getSupportFragmentManager()
@@ -46,9 +49,15 @@ public class UserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
 
-        mTextMessage = findViewById(R.id.message);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.user_fragment_container, new UserViewFragment())
+                .commit();
+
+
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
     }
 
 }

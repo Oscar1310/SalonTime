@@ -20,11 +20,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.regex.Pattern;
+
 public class CreateUserActivity extends AppCompatActivity {
 
     private static final String TAG = "CreateUserActivity";
 
     private FirebaseAuth mAuth;
+    private String email, name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +52,45 @@ public class CreateUserActivity extends AppCompatActivity {
 
     public void createUser(){
 
+        TextView nameField = findViewById(R.id.create_user_name);
         TextView emailField = findViewById(R.id.create_user_email);
         TextView passwordField = findViewById(R.id.create_user_password);
         TextView passwordRepeatField = findViewById(R.id.create_user_password_repeat);
 
-        String email = emailField.getText().toString();
+        name = nameField.getText().toString();
+        email = emailField.getText().toString();
         String password = passwordField.getText().toString();
         String passwordRepeat = passwordRepeatField.getText().toString();
 
-        if (password.equals(passwordRepeat)) {
+        Boolean allOkeyForCreatingUser = true;
+
+        if (name.equals("")) {
+            nameField.setError("Name require");
+            allOkeyForCreatingUser = false;
+        }
+
+        if (!emaiIsValid(email)) {
+            emailField.setError("Invalid email address");
+            allOkeyForCreatingUser = false;
+        }
+
+        if (password.equals("")) {
+            passwordField.setError("Password required");
+            allOkeyForCreatingUser = false;
+        }
+
+        if (passwordRepeatField.equals("")) {
+            passwordRepeatField.setError("Password required");
+            allOkeyForCreatingUser = false;
+        }
+
+        if (!password.equals(passwordRepeat)) {
+            passwordRepeatField.setError("Passwords not match");
+            passwordField.setError("Passwords not match");
+            allOkeyForCreatingUser = false;
+        }
+
+        if (allOkeyForCreatingUser) {
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -74,6 +107,10 @@ public class CreateUserActivity extends AppCompatActivity {
                                         .setDisplayName(name)
                                         .build();
                                 user.updateProfile(profileUpdates);
+
+                                User saveUser = new User(user.getUid(), name, email);
+
+                                saveUser.save();
 
                                 Intent intent = new Intent(CreateUserActivity.this, LoginActivity.class);
                                 startActivity(intent);
@@ -92,10 +129,21 @@ public class CreateUserActivity extends AppCompatActivity {
                     });
         } else {
 
-            Toast.makeText(CreateUserActivity.this, "Cant create user because passwords not same, Please try again.",
+            Toast.makeText(CreateUserActivity.this, "Cant create user, Please try again.",
                     Toast.LENGTH_SHORT).show();
         }
 
+
+    }
+
+    public boolean emaiIsValid(String email) {
+        if (email == null) return false;
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+        Pattern pat = Pattern.compile(emailRegex);
+        return pat.matcher(email).matches();
 
     }
 
