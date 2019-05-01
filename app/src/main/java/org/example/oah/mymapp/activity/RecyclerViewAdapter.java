@@ -1,11 +1,8 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,9 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.Task;
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Salon;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{

@@ -1,4 +1,4 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.model;
 
 import java.io.Serializable;
 

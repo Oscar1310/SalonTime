@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".CreateUserActivity"
+    tools:context=".activity.CreateUserActivity"
     tools:showIn="@layout/activity_create_user">
 
     <EditText
@@ -14,30 +14,31 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="@string/signup_name_text"
         android:inputType="textPersonName"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@+id/create_user_email"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/create_user_email"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="@string/login_email"
         android:inputType="textEmailAddress"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@+id/create_user_password"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_user_name" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/create_user_password"
@@ -46,13 +47,15 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="@string/login_password"
         android:inputType="textPassword"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_user_email" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/create_user_password_repeat"
@@ -64,7 +67,7 @@
         android:ems="10"
         android:hint="@string/password_repeat"
         android:inputType="textPassword"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/create_user_password" />
@@ -79,5 +82,6 @@
         android:text="@string/create_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/create_user_password_repeat" />
+        app:layout_constraintTop_toBottomOf="@+id/create_user_password_repeat"
+        android:background="@drawable/button_style"/>
 </android.support.constraint.ConstraintLayout>

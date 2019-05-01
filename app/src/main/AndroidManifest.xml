@@ -22,42 +22,42 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".UserActivity"
+            android:name=".activity.UserActivity"
             android:label="@string/title_activity_user"
-            android:parentActivityName=".MapsActivity"
+            android:parentActivityName=".activity.MapsActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.example.oah.mymapp.MapsActivity" />
+                android:value="org.example.oah.mymapp.activity.MapsActivity" />
         </activity>
         <activity
-            android:name=".CreateUserActivity"
-            android:label="@string/title_activity_create_user"
-            android:parentActivityName=".LoginActivity"
+            android:name=".activity.CreateUserActivity"
+            android:label="Create User"
+            android:parentActivityName=".activity.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.example.oah.mymapp.LoginActivity" />
+                android:value="org.example.oah.mymapp.activity.LoginActivity" />
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/title_activity_login"
-            android:parentActivityName=".MapsActivity"
+            android:parentActivityName=".activity.MapsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.example.oah.mymapp.MapsActivity" />
+                android:value="org.example.oah.mymapp.activity.MapsActivity" />
         </activity>
         <activity
-            android:name=".AddEditSalon"
-            android:parentActivityName=".MapsActivity"
+            android:name=".activity.AddEditSalon"
+            android:parentActivityName=".activity.MapsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.example.oah.mymapp.MapsActivity" />
+                android:value="org.example.oah.mymapp.activity.MapsActivity" />
         </activity>
 
         <meta-data
@@ -65,7 +65,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".activity.MapsActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait">
             <intent-filter>

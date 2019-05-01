@@ -1,4 +1,4 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +18,11 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Review;
+import org.example.oah.mymapp.model.Salon;
+import org.example.oah.mymapp.model.Service;
 
 import java.util.ArrayList;
 

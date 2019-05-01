@@ -1,12 +1,13 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import org.example.oah.mymapp.R;
 
 public class UserActivity extends AppCompatActivity {
 

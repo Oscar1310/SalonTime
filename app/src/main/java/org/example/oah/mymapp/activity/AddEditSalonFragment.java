@@ -1,20 +1,15 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
-import android.Manifest;
 import android.app.Dialog;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,9 +19,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Salon;
 
 public class AddEditSalonFragment extends Fragment
         implements OnMapReadyCallback {

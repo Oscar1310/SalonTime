@@ -1,4 +1,4 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -21,6 +21,10 @@ import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationClickListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Salon;
+import org.example.oah.mymapp.utli.PermissionUtils;
 
 public class AddEditSalon extends AppCompatActivity implements
         OnMapReadyCallback,

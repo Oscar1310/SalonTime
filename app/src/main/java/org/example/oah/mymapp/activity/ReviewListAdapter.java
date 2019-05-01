@@ -1,4 +1,4 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,8 +9,10 @@ import android.widget.ArrayAdapter;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Review;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class ReviewListAdapter extends ArrayAdapter<Review> {
     private static final String TAG = "ReviewListAdapter";

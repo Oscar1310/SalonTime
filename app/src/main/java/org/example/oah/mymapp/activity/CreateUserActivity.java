@@ -1,10 +1,8 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,6 +17,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.User;
 
 import java.util.regex.Pattern;
 

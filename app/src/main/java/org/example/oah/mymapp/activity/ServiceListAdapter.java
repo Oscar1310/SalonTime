@@ -1,4 +1,4 @@
-package org.example.oah.mymapp;
+package org.example.oah.mymapp.activity;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,8 +8,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.example.oah.mymapp.R;
+import org.example.oah.mymapp.model.Service;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class ServiceListAdapter extends ArrayAdapter<Service> {
     private static final String TAG = "ServiceListAdapter";
