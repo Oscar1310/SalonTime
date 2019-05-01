@@ -2,12 +2,16 @@ package org.example.oah.mymapp.model;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+
 
 public class User {
 
     private static final String TAG = "User";
 
     String name, email, id;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public User(String id, String name, String email) {
         this.name = name;
@@ -42,6 +46,10 @@ public class User {
     public void save() {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Users");
         mDatabase.child(this.id).setValue(this);
+
+        db.collection("Users")
+                .document(this.id)
+                .set(this);
     }
 
     @Override

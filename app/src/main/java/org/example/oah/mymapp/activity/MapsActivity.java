@@ -239,7 +239,7 @@ public class MapsActivity extends AppCompatActivity
 
                     Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
                             .title(child.child("name").getValue().toString())
-                            .snippet("test")
+                            .snippet(salon.getMarkerData())
                     );
                     marker.setTag(salon);
 

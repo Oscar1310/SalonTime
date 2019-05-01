@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -11,8 +12,6 @@ import java.util.UUID;
 public class Salon implements Serializable {
 
     private static final String TAG = "Salon";
-
-    private DatabaseReference mDatabase;
 
     public String id;
     public String name;
@@ -23,6 +22,7 @@ public class Salon implements Serializable {
     public String femaleAverage;
     public String createdUser;
     public String description;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public Salon(String name, String description, double locLat,
                  double locLang, String phoneNumber, String maleAverage,
@@ -58,8 +58,12 @@ public class Salon implements Serializable {
 
     public void save() {
         Log.d(TAG, "Salon save: " + this.name);
-        mDatabase = FirebaseDatabase.getInstance().getReference("Salons");
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Salons");
         mDatabase.child(this.id).setValue(this);
+
+        db.collection("Salons")
+                .document(this.id)
+                .set(this);
     }
 
 
@@ -73,5 +77,21 @@ public class Salon implements Serializable {
                 ", createdUser='" + createdUser + '\'' +
                 ", description='" + description + '\'' +
                 '}';
+    }
+
+    public String getMarkerData() {
+        String info = "";
+
+        if (this.femaleAverage != null) {
+            info += "Female avg: " +  this.femaleAverage + " € ";
+        }
+
+        if (this.maleAverage != null) {
+            info += "Male avg: " +  this.maleAverage + " € ";
+        }
+
+        info += "Rating: 5/4";
+
+        return info;
     }
 }
