@@ -33,8 +33,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,7 +75,16 @@ public class MapsActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
 
-    ListView serviceList;
+    private RatingBar salonReiting;
+    private TextView salonComment;
+
+    private Salon markerSalon;
+
+    private ListView serviceList, reviewList;
+    private Dialog rateSalonDialog;
+
+    private ArrayList<Review> reviewArrayList;
+
 
 
     /**
@@ -173,7 +187,7 @@ public class MapsActivity extends AppCompatActivity
                                     public void onInfoWindowClick(Marker marker)  {
                                         Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
 
-                                        Salon salon = (Salon) marker.getTag();
+                                        markerSalon = (Salon) marker.getTag();
 
                                         Dialog dialog = new Dialog(MapsActivity.this);
                                         dialog.setContentView(R.layout.salon_simple_view);
@@ -181,23 +195,24 @@ public class MapsActivity extends AppCompatActivity
                                         dialog.show();
 
                                         TextView heading = dialog.findViewById(R.id.salon_view_heading);
-                                        heading.setText(salon.name);
+                                        heading.setText(markerSalon.name);
                                         TextView description = dialog.findViewById(R.id.salon_view_description);
-                                        description.setText(salon.description);
+                                        description.setText(markerSalon.description);
                                         TextView phone = dialog.findViewById(R.id.salon_view_phone);
-                                        phone.setText(salon.phoneNumber);
+                                        phone.setText(markerSalon.phoneNumber);
 
                                         TextView femalePrice = dialog.findViewById(R.id.salon_view_female_price);
-                                        femalePrice.setText(salon.femaleAverage + "€");
+                                        femalePrice.setText(markerSalon.femaleAverage + "€");
                                         TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
-                                        menPrice.setText(salon.maleAverage + "€");
+                                        menPrice.setText(markerSalon.maleAverage + "€");
 
                                         serviceList = dialog.findViewById(R.id.salon_services_list);
+                                        reviewList = dialog.findViewById(R.id.salon_reviews_list);
 
-                                        FirebaseFirestore dbSalonServices = FirebaseFirestore.getInstance();
+                                        FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
 
-                                        dbSalonServices.collection("Services")
-                                                .whereEqualTo("salonId",salon.id)
+                                        dbQuery.collection("Services")
+                                                .whereEqualTo("salonId",markerSalon.id)
                                                 .get()
                                                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                     @Override
@@ -218,20 +233,85 @@ public class MapsActivity extends AppCompatActivity
                                                     }
                                                 });
 
+                                        dbQuery.collection("Reviews")
+                                                .whereEqualTo("salonId", markerSalon.id)
+                                                .get()
+                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                        if (task.isSuccessful()) {
+                                                            reviewArrayList = new ArrayList<>();
+                                                            for (QueryDocumentSnapshot review : task.getResult()) {
+                                                                Log.d(TAG, review.getId() + " => " + review.getData());
+                                                                reviewArrayList.add(new Review(review.get("comment").toString(), Integer.parseInt(review.get("rating").toString())));
+                                                            }
+                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+                                                            reviewList.setAdapter(reviewListAdapter);
+                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
+                                                            lp.height = reviewArrayList.size() * 140;
+                                                            reviewList.setLayoutParams(lp);
 
-                                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
-                                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
-                                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
+                                                        }
+                                                    }
+                                                });
 
-                                        ArrayList<Review> reviewArrayList = new ArrayList<>();
 
-                                        reviewArrayList.add(review1);
-                                        reviewArrayList.add(review2);
-                                        reviewArrayList.add(review3);
+                                        ImageView add_comment = dialog.findViewById(R.id.add_comment);
+                                        add_comment.setOnClickListener(new View.OnClickListener(){
+                                            @Override
+                                            public void onClick(View v) {
+                                                if (currentUser == null) {
+                                                    //intent = new Intent(MapsActivity.this, LoginActivity.class);
+                                                    Toast.makeText(MapsActivity.this, "Please log in to rate salon", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    rateSalonDialog = new Dialog(MapsActivity.this);
+                                                    rateSalonDialog.setContentView(R.layout.rate_salon_view);
+                                                    rateSalonDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                                                    rateSalonDialog.show();
 
-                                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
-                                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
-                                        reviewList.setAdapter(reviewListAdapter);
+                                                    salonReiting = rateSalonDialog.findViewById(R.id.salon_rating);
+                                                    salonComment = rateSalonDialog.findViewById(R.id.salon_comment);
+
+                                                    Button rate_salon_btn = rateSalonDialog.findViewById(R.id.rate_salon_btn);
+                                                    rate_salon_btn.setOnClickListener(new View.OnClickListener(){
+                                                        @Override
+                                                        public void onClick(View v) {
+                                                            Review review = new Review(salonComment.getText().toString(),
+                                                                    (int) salonReiting.getRating(),
+                                                                    markerSalon.id,
+                                                                    currentUser.getUid());
+
+                                                            review.create();
+
+                                                            reviewArrayList.add(0, review);
+                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+                                                            reviewList.setAdapter(reviewListAdapter);
+                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
+                                                            lp.height = reviewArrayList.size() * 140;
+                                                            reviewList.setLayoutParams(lp);
+
+                                                            rateSalonDialog.cancel();
+
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+
+
+//                                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
+//                                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
+//                                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
+//
+//                                        ArrayList<Review> reviewArrayList = new ArrayList<>();
+//
+//                                        reviewArrayList.add(review1);
+//                                        reviewArrayList.add(review2);
+//                                        reviewArrayList.add(review3);
+//
+//                                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+//                                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
+//                                        reviewList.setAdapter(reviewListAdapter);
 
 
                                     }

@@ -13,8 +13,15 @@ public class Review implements Serializable {
     private static final String TAG = "Review";
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    private String comment, salondID;
+    private String comment, salondID, userID;
     private int rating;
+
+    public Review(String comment, int rating, String salondID, String userID) {
+        this.comment = comment;
+        this.rating = rating;
+        this.salondID = salondID;
+        this.userID = userID;
+    }
 
     public Review(String comment, int rating, String salondID) {
         this.comment = comment;
@@ -34,7 +41,7 @@ public class Review implements Serializable {
         review.put("comment", this.comment);
         review.put("rating", this.rating);
         review.put("salonId", this.salondID);
-        review.put("createUserId", "6WwIHAwcn1MAmIF385ZCE4dx2m33");
+        review.put("createUserId", this.userID);
         review.put("createDate", currentTime);
 
         db.collection("Reviews")
