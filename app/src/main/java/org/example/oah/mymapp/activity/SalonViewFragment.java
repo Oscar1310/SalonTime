@@ -18,6 +18,11 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.Review;
@@ -34,6 +39,8 @@ public class SalonViewFragment extends Fragment
     private MapView mapView;
     private Bundle arguments;
     private Salon salon;
+    ListView serviceList;
+    ArrayList<Service> serviceArrayList = new ArrayList<>();
 
     @Nullable
     @Override
@@ -50,26 +57,51 @@ public class SalonViewFragment extends Fragment
         TextView phone = view.findViewById(R.id.salon_view_phone);
         phone.setText(salon.phoneNumber);
 
-        TextView femalePrice = view.findViewById(R.id.salon_view_men_price);
+        TextView femalePrice = view.findViewById(R.id.salon_view_female_price);
         femalePrice.setText(salon.femaleAverage + "€");
         TextView menPrice = view.findViewById(R.id.salon_view_men_price);
         menPrice.setText(salon.maleAverage + "€");
 
+        serviceList = view.findViewById(R.id.salon_services_list);
 
-        Service service1 = new Service("MEN’S hair toning", 11);
-        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
-        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
-       // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
+        FirebaseFirestore dbSalonServices = FirebaseFirestore.getInstance();
+        dbSalonServices.collection("Services")
+                .whereEqualTo("salonId",salon.id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList<Service> serviceArrayList = new ArrayList<>();
+                            for (QueryDocumentSnapshot service : task.getResult()) {
+                                Log.d(TAG, service.getId() + " => " + service.getData());
+                                serviceArrayList.add(new Service(service.get("name").toString(), Double.parseDouble(service.get("price").toString())));
+                            }
+                            ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
+                            serviceList.setAdapter(serviceAdapter);
+                            ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
+                            lp.height = serviceArrayList.size() * 80;
+                            serviceList.setLayoutParams(lp);
 
-        ArrayList<Service> serviceArrayList = new ArrayList<>();
+                        }
+                    }
+                });
 
-        serviceArrayList.add(service1);
-        serviceArrayList.add(service2);
-        serviceArrayList.add(service3);
 
-        ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
-        ListView serviceList = view.findViewById(R.id.salon_services_list);
-        serviceList.setAdapter(serviceAdapter);
+//        Service service1 = new Service("MEN’S hair toning", 11);
+//        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
+//        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
+//       // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
+//
+//        ArrayList<Service> serviceArrayList = new ArrayList<>();
+//
+//        serviceArrayList.add(service1);
+//        serviceArrayList.add(service2);
+//        serviceArrayList.add(service3);
+//
+//        ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
+//        ListView serviceList = view.findViewById(R.id.salon_services_list);
+//        serviceList.setAdapter(serviceAdapter);
 
         Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
         Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
@@ -89,17 +121,17 @@ public class SalonViewFragment extends Fragment
 
         Log.d(TAG, "onCreateView: " +  salon.toString());
 
-        ImageView editBtn = view.findViewById(R.id.edit_btn);
-        editBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-//                Log.d(TAG, "onClick: edti salon");
-//                getSupportFragmentManager()
-//                        .beginTransaction()
-//                        .replace(R.id.user_fragment_container, new AddEditSalonFragment())
-//                        .commit();
-            }
-        });
+//        ImageView editBtn = view.findViewById(R.id.edit_btn);
+//        editBtn.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v) {
+////                Log.d(TAG, "onClick: edti salon");
+////                getSupportFragmentManager()
+////                        .beginTransaction()
+////                        .replace(R.id.user_fragment_container, new AddEditSalonFragment())
+////                        .commit();
+//            }
+//        });
 
 
         return view;

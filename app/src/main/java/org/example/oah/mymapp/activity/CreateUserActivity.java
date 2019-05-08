@@ -116,16 +116,11 @@ public class CreateUserActivity extends AppCompatActivity {
                                 Intent intent = new Intent(CreateUserActivity.this, LoginActivity.class);
                                 startActivity(intent);
 
-                                //updateUI(user);
                             } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "CreateUserActivity:failure", task.getException());
                                 Toast.makeText(CreateUserActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
-                                //updateUI(null);
                             }
 
-                            // ...
                         }
                     });
         } else {

@@ -4,6 +4,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class User {
@@ -47,9 +51,26 @@ public class User {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Users");
         mDatabase.child(this.id).setValue(this);
 
+        Date currentTime = Calendar.getInstance().getTime();
+        Map<String, Object> createUser = new HashMap<>();
+        createUser.put("name", this.name);
+        createUser.put("email", this.email);
+        createUser.put("createDate", currentTime);
+
+
         db.collection("Users")
                 .document(this.id)
-                .set(this);
+                .set(createUser);
+    }
+
+    public void update(){
+        Map<String, Object> changeUser = new HashMap<>();
+        changeUser.put("name", this.name);
+        changeUser.put("email", this.email);
+
+        db.collection("Users")
+                .document(this.id)
+                .update(changeUser);
     }
 
     @Override

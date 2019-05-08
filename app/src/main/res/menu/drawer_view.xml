@@ -3,12 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/signin_btn"
+        android:id="@+id/profile_btn"
         android:icon="@drawable/ic_person_outline_black_24dp"
         android:title="@string/menu_logout_text" />
 
-    <item
-        android:id="@+id/add_salone"
-        android:icon="@drawable/ic_add_circle_black_24dp"
-        android:title="@string/add_salone_button" />
 </menu>

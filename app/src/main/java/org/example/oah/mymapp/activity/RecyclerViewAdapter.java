@@ -20,25 +20,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     private static final String TAG = "RecyclerViewAdapter";
 
- //   private Context context;
-//    private ArrayList<String> salonId;
-//    private ArrayList<String> salonNames;
-//    private ArrayList<String> salonDescriptions;
-
-//    public RecyclerViewAdapter(ArrayList<String> salonNames, ArrayList<String> salonDescriptions) {
-//        Log.d(TAG, "RecyclerViewAdapter: called " + salonNames.size());
-//
-// //       this.context = context;
-//        this.salonNames = salonNames;
-//        this.salonDescriptions = salonDescriptions;
-//    }
 
     private List<Salon> salons;
 
     public RecyclerViewAdapter(List<Salon> salons) {
-        Log.d(TAG, "RecyclerViewAdapter: called " + salons.size());
-
-        //       this.context = context;
         this.salons = salons;
     }
 
@@ -55,9 +40,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-
-        Log.d(TAG, "onBindViewHolder: called");
-
         viewHolder.name.setText(salons.get(i).name);
         viewHolder.description.setText(salons.get(i).description);
 
@@ -66,7 +48,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View.OnClickListener clickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: starts" + selectedSalon.name);
 
                 Bundle arguments = new Bundle();
                 arguments.putSerializable(Salon.class.getSimpleName(), selectedSalon);
@@ -80,12 +61,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                         .replace(R.id.user_fragment_container, salonViewFragment)
                         .commit();
 
-//                getSupportFragmentManager()
-//                        .setArguments(arguments)
-//                        .beginTransaction()
-//                        .replace(R.id.user_fragment_container, new SalonViewFragment())
-//                        .commit();
-
 
             }
         };
@@ -93,7 +68,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         View.OnLongClickListener longClickListener =new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Log.d(TAG, "onLongClick starts");
                 return false;
             }
         };

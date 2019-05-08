@@ -9,22 +9,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.maps.android.clustering.Cluster;
-import com.google.maps.android.clustering.ClusterItem;
-import com.google.maps.android.clustering.ClusterManager;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -43,11 +39,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.example.oah.mymapp.R;
-import org.example.oah.mymapp.model.ClusterMarker;
 import org.example.oah.mymapp.model.Review;
 import org.example.oah.mymapp.model.Salon;
 import org.example.oah.mymapp.model.Service;
-import org.example.oah.mymapp.utli.MyClusterManagerRenderer;
 import org.example.oah.mymapp.utli.PermissionUtils;
 
 import java.util.ArrayList;
@@ -75,6 +69,10 @@ public class MapsActivity extends AppCompatActivity
     private GoogleMap mMap;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
+
+    ListView serviceList;
+
+
 //    private ClusterManager mClusterManager;
 //    private MyClusterManagerRenderer mMyClusterManagerRenderer;
 //    private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
@@ -89,6 +87,25 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
+//
+//        FirebaseFirestore dbSalonServices = FirebaseFirestore.getInstance();
+//        dbSalonServices.collection("Services")
+//                .whereEqualTo("salonId","46cc38c4-30db-4b11-b955-5d45d0dab2bf")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot service : task.getResult()) {
+//                                Log.d(TAG, "SERVICE  " + service.getId() + " => " + service.getData());
+//                            }
+//                        }
+//                    }
+//                });
+
+
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 
@@ -101,6 +118,7 @@ public class MapsActivity extends AppCompatActivity
 
 
         drawerLayout = findViewById(R.id.maps_layout);
+
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
@@ -115,19 +133,8 @@ public class MapsActivity extends AppCompatActivity
                         Log.d(TAG, "onNavigationItemSelected: touched: " + menuItem.getItemId());
 
                         switch (menuItem.getItemId()) {
-                            case R.id.add_salone:
-                                Log.d(TAG, "onOptionsItemSelected: add salon");
 
-                                if (currentUser == null) {
-                                    Toast.makeText(MapsActivity.this, "For adding salon you need to login", Toast.LENGTH_SHORT).show();
-                                    return true;
-                                }
-
-                                intent = new Intent(MapsActivity.this, AddEditSalon.class);
-                                startActivity(intent);
-                                break;
-
-                            case R.id.signin_btn:
+                            case R.id.profile_btn:
                                 Log.d(TAG, "onOptionsItemSelected: log in");
                                 if (currentUser == null) {
                                     intent = new Intent(MapsActivity.this, LoginActivity.class);
@@ -143,6 +150,23 @@ public class MapsActivity extends AppCompatActivity
                     }
                 });
 
+
+//        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3, "3d8c431b-9e10-45ce-ab49-19e73982e3a6");
+//        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4, "3d8c431b-9e10-45ce-ab49-19e73982e3a6");
+//        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5, "3d8c431b-9e10-45ce-ab49-19e73982e3a6");
+//
+//        review1.create();
+//        review2.create();
+//        review3.create();
+
+
+//        Service service1 = new Service("MEN’S hair toning","3d8c431b-9e10-45ce-ab49-19e73982e3a6", 11);
+//        Service service2 = new Service("WOMAN’S hair roots colouring","3d8c431b-9e10-45ce-ab49-19e73982e3a6", 35);
+//        Service service3 = new Service("WOMAN’S hair colouring and/or highlights","3d8c431b-9e10-45ce-ab49-19e73982e3a6", 30);
+//
+//        service1.create();
+//        service2.create();
+//        service3.create();
 
     }
 
@@ -160,161 +184,271 @@ public class MapsActivity extends AppCompatActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.436375,24.756952),15));
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Salons");
 
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                    String id, name, description, phoneNumber, maleAverage, femaleAverage, createdUser;
-                    double locLang, locLat;
-
-                for(DataSnapshot child : dataSnapshot.getChildren() ){
-                    // Do magic here
-
-                    if (child.child("createdUser").getValue() != null) {
-                        id = child.child("createdUser").getValue().toString();
-                    } else {
-                        id = "";
-                    }
-
-                    if (child.child("name").getValue() != null) {
-                        name = child.child("name").getValue().toString();
-                    } else {
-                        name = "";
-                    }
-
-                    if (child.child("description").getValue() != null) {
-                        description = child.child("description").getValue().toString();
-                    } else {
-                        description = "";
-                    }
-
-                    if (child.child("locLat").getValue() != null) {
-                        locLat = Double.parseDouble(child.child("locLat").getValue().toString());
-                    } else {
-                        locLat = 0.00;
-                    }
-
-                    if (child.child("locLang").getValue() != null) {
-                        locLang = Double.parseDouble(child.child("locLang").getValue().toString());
-                    } else {
-                        locLang = 0.00;
-                    }
-
-                    if (child.child("phoneNumber").getValue() != null) {
-                        phoneNumber = child.child("phoneNumber").getValue().toString();
-                    } else {
-                        phoneNumber = "";
-                    }
-
-                    if (child.child("maleAverage").getValue() != null) {
-                        maleAverage = child.child("maleAverage").getValue().toString();
-                    } else {
-                        maleAverage = "";
-                    }
-
-                    if (child.child("femaleAverage").getValue() != null) {
-                        femaleAverage = child.child("femaleAverage").getValue().toString();
-                    } else {
-                        femaleAverage = "";
-                    }
-
-                    if (child.child("createdUser").getValue() != null) {
-                        createdUser = child.child("createdUser").getValue().toString();
-                    } else {
-                        createdUser = "";
-                    }
-
-
-                    Salon salon = new Salon(id, name, description,
-                            locLat, locLang, phoneNumber,
-                            maleAverage, femaleAverage, createdUser
-                    );
-
-                    Log.d(TAG, "onDataChange: " + salon.toString());
-
-                    LatLng latLng = new LatLng(salon.locLat, salon.locLang);
-
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
-                            .title(child.child("name").getValue().toString())
-                            .snippet(salon.getMarkerData())
-                    );
-                    marker.setTag(salon);
-
-                }
-
-                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()  {
+        db.collection("Salons")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onInfoWindowClick(Marker marker)  {
-                        Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
 
-                        Salon salon = (Salon) marker.getTag();
+                                Salon salon = new Salon(document.getId(), document.get("name").toString(), document.get("description").toString(),
+                                        (double) document.get("locLat"), (double) document.get("locLang"), document.get("phoneNumber").toString(),
+                                        document.get("maleAverage").toString(), document.get("femaleAverage").toString()
+                                );
 
-                        Dialog dialog = new Dialog(MapsActivity.this);
-                        dialog.setContentView(R.layout.salon_view);
-                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                        dialog.show();
+                                LatLng latLng = new LatLng(salon.locLat, salon.locLang);
+                                Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
+                                        .title(salon.name)
+                                        .snippet(salon.getMarkerData())
+                                );
 
-                        TextView heading = dialog.findViewById(R.id.salon_view_heading);
-                        heading.setText(salon.name);
-                        TextView description = dialog.findViewById(R.id.salon_view_description);
-                        description.setText(salon.description);
-                        TextView phone = dialog.findViewById(R.id.salon_view_phone);
-                        phone.setText(salon.phoneNumber);
+                                marker.setTag(salon);
+                                Log.d(TAG, document.getId() + " => " + salon.toString());
 
-                        TextView femalePrice = dialog.findViewById(R.id.salon_view_men_price);
-                        femalePrice.setText(salon.femaleAverage + "€");
-                        TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
-                        menPrice.setText(salon.maleAverage + "€");
+                                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()  {
+                                    @Override
+                                    public void onInfoWindowClick(Marker marker)  {
+                                        Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
+
+                                        Salon salon = (Salon) marker.getTag();
+
+                                        Dialog dialog = new Dialog(MapsActivity.this);
+                                        dialog.setContentView(R.layout.salon_simple_view);
+                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                                        dialog.show();
+
+                                        TextView heading = dialog.findViewById(R.id.salon_view_heading);
+                                        heading.setText(salon.name);
+                                        TextView description = dialog.findViewById(R.id.salon_view_description);
+                                        description.setText(salon.description);
+                                        TextView phone = dialog.findViewById(R.id.salon_view_phone);
+                                        phone.setText(salon.phoneNumber);
+
+                                        TextView femalePrice = dialog.findViewById(R.id.salon_view_female_price);
+                                        femalePrice.setText(salon.femaleAverage + "€");
+                                        TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
+                                        menPrice.setText(salon.maleAverage + "€");
+
+                                        serviceList = dialog.findViewById(R.id.salon_services_list);
+
+                                        FirebaseFirestore dbSalonServices = FirebaseFirestore.getInstance();
+
+                                        dbSalonServices.collection("Services")
+                                                .whereEqualTo("salonId",salon.id)
+                                                .get()
+                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                        if (task.isSuccessful()) {
+                                                            ArrayList<Service> serviceArrayList = new ArrayList<>();
+                                                            for (QueryDocumentSnapshot service : task.getResult()) {
+                                                                Log.d(TAG, service.getId() + " => " + service.getData());
+                                                                serviceArrayList.add(new Service(service.get("name").toString(), Double.parseDouble(service.get("price").toString())));
+                                                            }
+                                                            ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
+                                                            serviceList.setAdapter(serviceAdapter);
+                                                            ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
+                                                            lp.height = serviceArrayList.size() * 80;
+                                                            serviceList.setLayoutParams(lp);
+
+                                                        }
+                                                    }
+                                                });
 
 
-                        Service service1 = new Service("MEN’S hair toning", 11);
-                        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
-                        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
-                        // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
-
-                        ArrayList<Service> serviceArrayList = new ArrayList<>();
-
-                        serviceArrayList.add(service1);
-                        serviceArrayList.add(service2);
-                        serviceArrayList.add(service3);
-
-                        ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
-                        ListView serviceList = dialog.findViewById(R.id.salon_services_list);
-                        serviceList.setAdapter(serviceAdapter);
-
-                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
-                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
-                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
-                        // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
-
-                        ArrayList<Review> reviewArrayList = new ArrayList<>();
-
-                        reviewArrayList.add(review1);
-                        reviewArrayList.add(review2);
-                        reviewArrayList.add(review3);
-
-                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
-                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
-                        reviewList.setAdapter(reviewListAdapter);
 
 
+//                                        Service service1 = new Service("MEN’S hair toning", 11);
+//                                        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
+//                                        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
+//
+//                                        ArrayList<Service> serviceArrayList = new ArrayList<>();
+//
+//                                        serviceArrayList.add(service1);
+//                                        serviceArrayList.add(service2);
+//                                        serviceArrayList.add(service3);
+//
+//                                        ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
+//                                        ListView serviceList = dialog.findViewById(R.id.salon_services_list);
+//                                        serviceList.setAdapter(serviceAdapter);
+
+                                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
+                                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
+                                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
+
+                                        ArrayList<Review> reviewArrayList = new ArrayList<>();
+
+                                        reviewArrayList.add(review1);
+                                        reviewArrayList.add(review2);
+                                        reviewArrayList.add(review3);
+
+                                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+                                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
+                                        reviewList.setAdapter(reviewListAdapter);
+
+
+                                    }
+                                });
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
                     }
                 });
 
-            }
-            
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-        
-        
+
+
+
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference myRef = database.getReference("Salons");
+//
+//        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//                    String id, name, description, phoneNumber, maleAverage, femaleAverage, createdUser;
+//                    double locLang, locLat;
+//
+//                for(DataSnapshot child : dataSnapshot.getChildren() ){
+//                    // Do magic here
+//
+//                    if (child.child("createdUser").getValue() != null) {
+//                        id = child.child("createdUser").getValue().toString();
+//                    } else {
+//                        id = "";
+//                    }
+//
+//                    if (child.child("name").getValue() != null) {
+//                        name = child.child("name").getValue().toString();
+//                    } else {
+//                        name = "";
+//                    }
+//
+//                    if (child.child("description").getValue() != null) {
+//                        description = child.child("description").getValue().toString();
+//                    } else {
+//                        description = "";
+//                    }
+//
+//                    if (child.child("locLat").getValue() != null) {
+//                        locLat = Double.parseDouble(child.child("locLat").getValue().toString());
+//                    } else {
+//                        locLat = 0.00;
+//                    }
+//
+//                    if (child.child("locLang").getValue() != null) {
+//                        locLang = Double.parseDouble(child.child("locLang").getValue().toString());
+//                    } else {
+//                        locLang = 0.00;
+//                    }
+//
+//                    if (child.child("phoneNumber").getValue() != null) {
+//                        phoneNumber = child.child("phoneNumber").getValue().toString();
+//                    } else {
+//                        phoneNumber = "";
+//                    }
+//
+//                    if (child.child("maleAverage").getValue() != null) {
+//                        maleAverage = child.child("maleAverage").getValue().toString();
+//                    } else {
+//                        maleAverage = "";
+//                    }
+//
+//                    if (child.child("femaleAverage").getValue() != null) {
+//                        femaleAverage = child.child("femaleAverage").getValue().toString();
+//                    } else {
+//                        femaleAverage = "";
+//                    }
+//
+//
+//                    Salon salon = new Salon(id, name, description,
+//                            locLat, locLang, phoneNumber,
+//                            maleAverage, femaleAverage);
+//
+//                    Log.d(TAG, "onDataChange: " + salon.toString());
+//
+//                    LatLng latLng = new LatLng(salon.locLat, salon.locLang);
+//
+//                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
+//                            .title(child.child("name").getValue().toString())
+//                            .snippet(salon.getMarkerData())
+//                    );
+//                    marker.setTag(salon);
+//
+//                }
+//
+//                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()  {
+//                    @Override
+//                    public void onInfoWindowClick(Marker marker)  {
+//                        Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
+//
+//                        Salon salon = (Salon) marker.getTag();
+//
+//                        Dialog dialog = new Dialog(MapsActivity.this);
+//                        dialog.setContentView(R.layout.salon_simple_view);
+//                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//                        dialog.show();
+//
+//                        TextView heading = dialog.findViewById(R.id.salon_view_heading);
+//                        heading.setText(salon.name);
+//                        TextView description = dialog.findViewById(R.id.salon_view_description);
+//                        description.setText(salon.description);
+//                        TextView phone = dialog.findViewById(R.id.salon_view_phone);
+//                        phone.setText(salon.phoneNumber);
+//
+//                        TextView femalePrice = dialog.findViewById(R.id.salon_view_men_price);
+//                        femalePrice.setText(salon.femaleAverage + "€");
+//                        TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
+//                        menPrice.setText(salon.maleAverage + "€");
+//
+//
+//                        Service service1 = new Service("MEN’S hair toning", 11);
+//                        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
+//                        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
+//
+//                        ArrayList<Service> serviceArrayList = new ArrayList<>();
+//
+//                        serviceArrayList.add(service1);
+//                        serviceArrayList.add(service2);
+//                        serviceArrayList.add(service3);
+//
+//                        ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
+//                        ListView serviceList = dialog.findViewById(R.id.salon_services_list);
+//                        serviceList.setAdapter(serviceAdapter);
+//
+//                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
+//                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
+//                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
+//
+//                        ArrayList<Review> reviewArrayList = new ArrayList<>();
+//
+//                        reviewArrayList.add(review1);
+//                        reviewArrayList.add(review2);
+//                        reviewArrayList.add(review3);
+//
+//                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+//                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
+//                        reviewList.setAdapter(reviewListAdapter);
+//
+//
+//                    }
+//                });
+//
+//            }
+//
+//
+//            @Override
+//            public void onCancelled(DatabaseError error) {
+//                // Failed to read value
+//                Log.w(TAG, "Failed to read value.", error.toException());
+//            }
+//        });
 
 //        addMapCustomMarkers();
 
@@ -414,7 +548,7 @@ public class MapsActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-    
+
 
 
 //    public void addMapCustomMarkers() {

@@ -1,6 +1,7 @@
 package org.example.oah.mymapp.activity;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -57,9 +59,11 @@ public class AddEditSalon extends AppCompatActivity implements
         mapFragment.getMapAsync(this);
 
 
-        Button saveBtn = findViewById(R.id.add_edit_save_btn);
+
         salonName = findViewById(R.id.create_salon_name);
 
+
+        Button saveBtn = findViewById(R.id.add_edit_save_btn);
         saveBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {

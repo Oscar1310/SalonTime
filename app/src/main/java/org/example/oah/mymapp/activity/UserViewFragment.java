@@ -67,7 +67,7 @@ public class UserViewFragment extends Fragment {
                     public void onClick(View v) {
                         user.setName(editName.getText().toString());
                         nameField.setText(editName.getText().toString());
-                        user.save();
+                        user.update();
                         dialog.cancel();
                     }
                 });
@@ -78,13 +78,7 @@ public class UserViewFragment extends Fragment {
                         dialog.cancel();
                     }
                 });
-
-
-
-                WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialog.getWindow().setAttributes(layoutParams);
+                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
 
 
                 dialog.show();
@@ -113,7 +107,7 @@ public class UserViewFragment extends Fragment {
                     public void onClick(View v) {
                         user.setEmail(editEmail.getText().toString());
                         emailField.setText(editEmail.getText().toString());
-                        user.save();
+                        user.update();
                         dialog.cancel();
                     }
                 });
@@ -125,14 +119,7 @@ public class UserViewFragment extends Fragment {
                     }
                 });
 
-
-
-                WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-                layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                dialog.getWindow().setAttributes(layoutParams);
-
-
+                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
                 dialog.show();
 
             }

@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Mymapp</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="app_name">Salon Time</string>
+    <string name="title_activity_maps">Salon Time</string>
     <string name="add_salone_button">Add salon</string>
     <string name="salon_name">Name</string>
     <string name="save_btn_text">Save</string>
@@ -49,4 +49,11 @@
     <string name="edit">Edit</string>
     <string name="create_text">create</string>
     <string name="logout_tex">Log out</string>
+    <string name="favorite_text">Favorite</string>
+    <string name="add_service_text">Add service</string>
+    <string name="homepage">Web site</string>
+    <string name="email">E-mail</string>
+    <string name="service">Service name</string>
+    <string name="price">Price €</string>
+    <string name="SALON_NAME">name</string>
 </resources>

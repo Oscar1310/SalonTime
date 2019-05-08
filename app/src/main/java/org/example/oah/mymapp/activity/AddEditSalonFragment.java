@@ -10,8 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,6 +26,9 @@ import com.google.firebase.auth.FirebaseUser;
 
 import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.Salon;
+import org.example.oah.mymapp.model.Service;
+
+import java.util.ArrayList;
 
 public class AddEditSalonFragment extends Fragment
         implements OnMapReadyCallback {
@@ -39,6 +44,13 @@ public class AddEditSalonFragment extends Fragment
     private Dialog editMapDialog;
 
 
+    TextView addServiceName, addServicePrice;
+    ListView serviceList;
+
+    Dialog dialog;
+    ArrayList<Service> serviceArrayList = new ArrayList<>();
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,8 +64,60 @@ public class AddEditSalonFragment extends Fragment
         salonMaleAveragPrice = view.findViewById(R.id.create_salon_men_avarge_price);
         femaleAveragePrice = view.findViewById(R.id.create_salon_female_avarge_price);
 
+        Service service1 = new Service("MEN’S hair toning", "3d8c431b-9e10-45ce-ab49-19e73982e3a6", 11);
+        Service service2 = new Service("WOMAN’S hair roots colouring", "3d8c431b-9e10-45ce-ab49-19e73982e3a6", 35);
+
+
+
+ //       ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
+        serviceList = view.findViewById(R.id.service_list);
+//        serviceList.setAdapter(serviceAdapter);
+
+        Button addService = view.findViewById(R.id.add_service_btn);
+        addService.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Log.d(TAG, "onClick: add service");
+
+                dialog = new Dialog(getActivity());
+                dialog.setContentView(R.layout.add_service_view);
+                dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+                dialog.show();
+                
+                Button add_service = dialog.findViewById(R.id.save_btn);
+
+                addServiceName = dialog.findViewById(R.id.service_name);
+                addServicePrice = dialog.findViewById(R.id.service_price);
+
+                add_service.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d(TAG, "onClick: add service");
+
+                        serviceArrayList.add(new Service(addServiceName.getText().toString(), Double.parseDouble(addServicePrice.getText().toString())));
+                        ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
+                        serviceList.setAdapter(serviceAdapter);
+
+                        ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
+
+                        lp.height = serviceArrayList.size() * 80;
+                        serviceList.setLayoutParams(lp);
+
+                        dialog.cancel();
+
+                        Log.d(TAG, "Service list: " + serviceArrayList.size() * 100);
+                    }
+                });
+            }
+        });
+
+
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+
+        
+
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,7 +158,12 @@ public class AddEditSalonFragment extends Fragment
                     salonLon, phone, malePrice, femalePrice, createdUser);
                     Log.d(TAG, "save salon: " + salon.toString());
 
-                    salon.save();
+                    salon.create();
+
+                    for (Service service : serviceArrayList) {
+                        Service addService = new Service(service.getName(), salon.id, service.getPrice());
+                        addService.create();
+                    }
 
                     Bundle arguments = new Bundle();
                     arguments.putSerializable(Salon.class.getSimpleName(), salon);

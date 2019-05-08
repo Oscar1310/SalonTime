@@ -16,8 +16,6 @@ public class UserActivity extends AppCompatActivity {
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-        //Fragment fragment = null;
-
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
@@ -27,6 +25,14 @@ public class UserActivity extends AppCompatActivity {
                             .replace(R.id.user_fragment_container, new UserViewFragment())
                             .commit();
                     return true;
+
+                case R.id.navigation_favorite:
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.user_fragment_container, new SalonsListFragment())
+                            .commit();
+                    return true;
+
                 case R.id.navigation_salons:
                     getSupportFragmentManager()
                             .beginTransaction()
