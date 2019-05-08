@@ -42,10 +42,6 @@ public class SalonsListFragment extends Fragment {
 
     private static final String TAG = "SalonsListFragment";
 
-//    private ArrayList<String> salonNames = new ArrayList<>();
-//    private ArrayList<String> salonDescription = new ArrayList<>();
-//    private ArrayList<String> salonId = new ArrayList<>();
-
     private ArrayList<Salon> salonsList = new ArrayList<>();
 
     private View view;
@@ -104,116 +100,10 @@ public class SalonsListFragment extends Fragment {
                     }
                 });
 
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        DatabaseReference myRef = database.getReference("Salons");
-//
-//        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//
-//        myRef.orderByChild("createdUser").equalTo(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                String id, name, description, phoneNumber, maleAverage, femaleAverage, createdUser;
-//                double locLang, locLat;
-//
-//                for(DataSnapshot child : dataSnapshot.getChildren() ){
-//                    // Do magic here
-//
-////                    Log.d(TAG, "Salong: " + child.child("name").getValue());
-////                    Log.d(TAG, "Salong: " + child.child("description").getValue());
-////
-////                    if (child.child("name").getValue() != null) {
-////                        salonNames.add(child.child("name").getValue().toString());
-////                    } else {
-////                        salonNames.add("-");
-////                    }
-////
-////                    if (child.child("description").getValue() != null) {
-////                        salonDescription.add(child.child("description").getValue().toString());
-////                    } else {
-////                        salonDescription.add("-");
-////                    }
-//
-//                    if (child.child("createdUser").getValue() != null) {
-//                        id = child.child("createdUser").getValue().toString();
-//                    } else {
-//                        id = "";
-//                    }
-//
-//                    if (child.child("name").getValue() != null) {
-//                        name = child.child("name").getValue().toString();
-//                    } else {
-//                        name = "";
-//                    }
-//
-//                    if (child.child("description").getValue() != null) {
-//                        description = child.child("description").getValue().toString();
-//                    } else {
-//                        description = "";
-//                    }
-//
-//                    if (child.child("locLat").getValue() != null) {
-//                        locLat = Double.parseDouble(child.child("locLat").getValue().toString());
-//                    } else {
-//                        locLat = 0.00;
-//                    }
-//
-//                    if (child.child("locLang").getValue() != null) {
-//                        locLang = Double.parseDouble(child.child("locLang").getValue().toString());
-//                    } else {
-//                        locLang = 0.00;
-//                    }
-//
-//                    if (child.child("phoneNumber").getValue() != null) {
-//                        phoneNumber = child.child("phoneNumber").getValue().toString();
-//                    } else {
-//                        phoneNumber = "";
-//                    }
-//
-//                    if (child.child("maleAverage").getValue() != null) {
-//                        maleAverage = child.child("maleAverage").getValue().toString();
-//                    } else {
-//                        maleAverage = "";
-//                    }
-//
-//                    if (child.child("femaleAverage").getValue() != null) {
-//                        femaleAverage = child.child("femaleAverage").getValue().toString();
-//                    } else {
-//                        femaleAverage = "";
-//                    }
-//
-//                    if (child.child("createdUser").getValue() != null) {
-//                        createdUser = child.child("createdUser").getValue().toString();
-//                    } else {
-//                        createdUser = "";
-//                    }
-//
-//
-//                    salonsList.add(new Salon(id, name, description,
-//                            locLat, locLang, phoneNumber,
-//                            maleAverage, femaleAverage
-//                    ));
-//
-//                }
-//
-//     //           firebaseCallback.onCallback(salonNames, salonDescription);
-//
-//                firebaseCallback.onCallback(salonsList);
-             //   Log.d(TAG, "onDataChange: " + salonNames.toString());
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError error) {
-//                // Failed to read value
-//                Log.w(TAG, "Failed to read value.", error.toException());
-//            }
-//        });
 
     }
 
     private interface FirebaseCallback {
-//        void onCallback(List<String> names, List<String> desciption);
 
         void onCallback(List<Salon> salons);
     }

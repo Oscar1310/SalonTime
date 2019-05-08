@@ -87,26 +87,9 @@ public class SalonViewFragment extends Fragment
                     }
                 });
 
-
-//        Service service1 = new Service("MEN’S hair toning", 11);
-//        Service service2 = new Service("WOMAN’S hair roots colouring", 35);
-//        Service service3 = new Service("WOMAN’S hair colouring and/or highlights ", 30);
-//       // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
-//
-//        ArrayList<Service> serviceArrayList = new ArrayList<>();
-//
-//        serviceArrayList.add(service1);
-//        serviceArrayList.add(service2);
-//        serviceArrayList.add(service3);
-//
-//        ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
-//        ListView serviceList = view.findViewById(R.id.salon_services_list);
-//        serviceList.setAdapter(serviceAdapter);
-
         Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
         Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
         Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
-        // Service service4 = new Service("WOMAN’S hair colouring and haircut for half-long hai", 45);
 
         ArrayList<Review> reviewArrayList = new ArrayList<>();
 
@@ -120,19 +103,6 @@ public class SalonViewFragment extends Fragment
 
 
         Log.d(TAG, "onCreateView: " +  salon.toString());
-
-//        ImageView editBtn = view.findViewById(R.id.edit_btn);
-//        editBtn.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View v) {
-////                Log.d(TAG, "onClick: edti salon");
-////                getSupportFragmentManager()
-////                        .beginTransaction()
-////                        .replace(R.id.user_fragment_container, new AddEditSalonFragment())
-////                        .commit();
-//            }
-//        });
-
 
         return view;
     }

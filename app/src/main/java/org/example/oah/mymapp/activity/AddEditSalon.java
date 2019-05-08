@@ -79,8 +79,6 @@ public class AddEditSalon extends AppCompatActivity implements
                 String createdUser = currentUser.getUid();
 
 
-//                Salon salon = new Salon(name, salonLat, salonLon, createdUser);
-//                salon.save();
             }
         });
 

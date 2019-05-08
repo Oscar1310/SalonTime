@@ -64,14 +64,7 @@ public class AddEditSalonFragment extends Fragment
         salonMaleAveragPrice = view.findViewById(R.id.create_salon_men_avarge_price);
         femaleAveragePrice = view.findViewById(R.id.create_salon_female_avarge_price);
 
-        Service service1 = new Service("MEN’S hair toning", "3d8c431b-9e10-45ce-ab49-19e73982e3a6", 11);
-        Service service2 = new Service("WOMAN’S hair roots colouring", "3d8c431b-9e10-45ce-ab49-19e73982e3a6", 35);
-
-
-
- //       ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
         serviceList = view.findViewById(R.id.service_list);
-//        serviceList.setAdapter(serviceAdapter);
 
         Button addService = view.findViewById(R.id.add_service_btn);
         addService.setOnClickListener(new View.OnClickListener(){
