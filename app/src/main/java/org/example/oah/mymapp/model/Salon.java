@@ -34,6 +34,8 @@ public class Salon implements Serializable {
     public String femaleAverage;
     public String createdUser;
     public String description;
+    public String email;
+    public String homePage;
 
     public Salon(String name, String description, double locLat,
                  double locLang, String phoneNumber, String maleAverage,
@@ -48,6 +50,33 @@ public class Salon implements Serializable {
         this.maleAverage = maleAverage;
         this.femaleAverage = femaleAverage;
         this.createdUser = createdUser;
+    }
+
+    public Salon(String id, String name, double locLat, double locLang, String phoneNumber, String maleAverage, String femaleAverage, String createdUser, String description, String email, String homePage) {
+        this.id = id;
+        this.name = name;
+        this.locLat = locLat;
+        this.locLang = locLang;
+        this.phoneNumber = phoneNumber;
+        this.maleAverage = maleAverage;
+        this.femaleAverage = femaleAverage;
+        this.createdUser = createdUser;
+        this.description = description;
+        this.email = email;
+        this.homePage = homePage;
+    }
+
+    public Salon(String name, double locLat, double locLang, String phoneNumber, String maleAverage, String femaleAverage, String createdUser, String description, String email, String homePage) {
+        this.name = name;
+        this.locLat = locLat;
+        this.locLang = locLang;
+        this.phoneNumber = phoneNumber;
+        this.maleAverage = maleAverage;
+        this.femaleAverage = femaleAverage;
+        this.createdUser = createdUser;
+        this.description = description;
+        this.email = email;
+        this.homePage = homePage;
     }
 
     public Salon(String id, String name, String description, double locLat,
@@ -79,6 +108,8 @@ public class Salon implements Serializable {
         saveSalon.put("phoneNumber", this.phoneNumber);
         saveSalon.put("maleAverage", this.maleAverage);
         saveSalon.put("femaleAverage", this.femaleAverage);
+        saveSalon.put("email", this.email);
+        saveSalon.put("homePage", this.homePage);
         saveSalon.put("createdUser", this.createdUser);
         saveSalon.put("createDate", currentTime);
 
@@ -86,40 +117,6 @@ public class Salon implements Serializable {
                 .document(this.id)
                 .set(saveSalon);
     }
-
-//    public Salon(String id) {
-//        db.collection("Salons")
-//                .document(id)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            DocumentSnapshot doc = task.getResult();
-//                            Salon a = new Salon(
-//                                    doc.get("id").toString(),
-//                                    doc.get("name").toString(),
-//                                    doc.get("description").toString(),
-//                                    (Double) doc.get("locLat"),
-//                                    (Double) doc.get("locLang"),
-//                                    doc.get("phoneNumber").toString(),
-//                                    doc.get("maleAverage").toString(),
-//                                    doc.get("femaleAverage").toString(),
-//                                    doc.get("createdUser").toString());
-//
-//                            Log.d(TAG, "Kanaliha" + a.toString());
-//
-//                        }
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.w(TAG, "Error adding document", e);
-//                    }
-//        });
-//    }
-
 
     @Override
     public String toString() {

@@ -299,21 +299,6 @@ public class MapsActivity extends AppCompatActivity
                                         });
 
 
-//                                        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
-//                                        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
-//                                        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
-//
-//                                        ArrayList<Review> reviewArrayList = new ArrayList<>();
-//
-//                                        reviewArrayList.add(review1);
-//                                        reviewArrayList.add(review2);
-//                                        reviewArrayList.add(review3);
-//
-//                                        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
-//                                        ListView reviewList = dialog.findViewById(R.id.salon_reviews_list);
-//                                        reviewList.setAdapter(reviewListAdapter);
-
-
                                     }
                                 });
                             }

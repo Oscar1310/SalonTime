@@ -83,11 +83,21 @@ public class SalonsListFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-//                                Log.d(TAG, document.getId() + " => " + document.getData());
 
-                                Salon salon = new Salon(document.getId(), document.get("name").toString(), document.get("description").toString(),
-                                        (double) document.get("locLat"), (double) document.get("locLang"), document.get("phoneNumber").toString(),
-                                        document.get("maleAverage").toString(), document.get("femaleAverage").toString()
+                                String name = (document.get("name")==null ? "" : document.get("name").toString());
+                                double lat = (document.get("locLat")==null ? 0 : (double) document.get("locLat"));
+                                double lan = (document.get("locLang")==null ? 0 : (double) document.get("locLang"));
+                                String phoneNumber = (document.get("phoneNumber")==null ? "" : document.get("phoneNumber").toString());
+                                String maleAverage = (document.get("maleAverage")==null ? "" : document.get("maleAverage").toString());
+                                String femaleAverage = (document.get("femaleAverage")==null ? "" : document.get("femaleAverage").toString());
+                                String createdUser = (document.get("createdUser")==null ? "" : document.get("createdUser").toString());
+                                String description = (document.get("description")==null ? "" : document.get("description").toString());
+                                String email = (document.get("email")==null ? "" : document.get("email").toString());
+                                String homePage = (document.get("homePage")==null ? "" : document.get("homePage").toString());
+
+                                Salon salon = new Salon(document.getId(), name,
+                                        lat, lan, phoneNumber, maleAverage, femaleAverage,
+                                        createdUser, description, email, homePage
                                 );
 
                                 salonsList.add(salon);

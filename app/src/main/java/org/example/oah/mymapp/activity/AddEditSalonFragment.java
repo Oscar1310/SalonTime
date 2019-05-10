@@ -38,11 +38,12 @@ public class AddEditSalonFragment extends Fragment
     private MapView mapView, dialogMapView;
     private GoogleMap googleMap, editMap;
     private TextView salonName, salonDescription, salonPhoneNumber,
-        salonMaleAveragPrice, femaleAveragePrice;
+        salonMaleAveragPrice, femaleAveragePrice, salonHomepage, salonEmail;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private Dialog editMapDialog;
 
+    private Salon salon;
 
     TextView addServiceName, addServicePrice;
     ListView serviceList;
@@ -57,14 +58,35 @@ public class AddEditSalonFragment extends Fragment
 
         View view = inflater.inflate(R.layout.create_salon_view, container, false);
 
+        Bundle arguments = getArguments();
+
+        if(arguments!=null) {
+            salon = (Salon) arguments.getSerializable(Salon.class.getSimpleName());
+        }
+
+
+
         Button saveBtn = view.findViewById(R.id.create_salon_save_btn);
         salonName = view.findViewById(R.id.create_salon_name);
         salonDescription = view.findViewById(R.id.create_salon_description);
         salonPhoneNumber = view.findViewById(R.id.create_salon_phone);
         salonMaleAveragPrice = view.findViewById(R.id.create_salon_men_avarge_price);
         femaleAveragePrice = view.findViewById(R.id.create_salon_female_avarge_price);
+        salonHomepage = view.findViewById(R.id.create_salon_home_page);
+        salonEmail = view.findViewById(R.id.create_salon_email);
+
 
         serviceList = view.findViewById(R.id.service_list);
+
+        if(salon!=null) {
+            salonName.setText(salon.name);
+            salonDescription.setText(salon.description);
+            salonPhoneNumber.setText(salon.phoneNumber);
+            salonMaleAveragPrice.setText(salon.maleAverage);
+            femaleAveragePrice.setText(salon.femaleAverage);
+            salonHomepage.setText(salon.homePage);
+            salonEmail.setText(salon.email);
+        }
 
         Button addService = view.findViewById(R.id.add_service_btn);
         addService.setOnClickListener(new View.OnClickListener(){
@@ -126,6 +148,8 @@ public class AddEditSalonFragment extends Fragment
                 String phone = salonPhoneNumber.getText().toString();
                 String malePrice = salonMaleAveragPrice.getText().toString();
                 String femalePrice = femaleAveragePrice.getText().toString();
+                String homePage = salonHomepage.getText().toString();
+                String email = salonHomepage.getText().toString();
 
                 Boolean allOkeyForSaving = true;
 
@@ -147,8 +171,22 @@ public class AddEditSalonFragment extends Fragment
                 }
 
                 if (allOkeyForSaving) {
-                    Salon salon = new Salon(name, description, salonLat,
-                    salonLon, phone, malePrice, femalePrice, createdUser);
+                    if (salon==null) {
+                        Salon salon = new Salon(name,salonLat, salonLon, phone,
+                                malePrice, femalePrice, createdUser,
+                                description, email,homePage
+                        );
+                    } else {
+                        salon.name = name;
+                        salon.email = email;
+                        salon.homePage = homePage;
+                        salon.femaleAverage = femalePrice;
+                        salon.maleAverage = malePrice;
+                        salon.phoneNumber = phone;
+                        salon.description = description;
+                        salon.locLang = salonLon;
+                        salon.locLat = salonLat;
+                    }
                     Log.d(TAG, "save salon: " + salon.toString());
 
                     salon.create();

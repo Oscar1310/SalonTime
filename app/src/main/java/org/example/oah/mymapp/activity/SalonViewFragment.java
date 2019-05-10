@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,6 +22,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -39,8 +43,7 @@ public class SalonViewFragment extends Fragment
     private MapView mapView;
     private Bundle arguments;
     private Salon salon;
-    ListView serviceList;
-    ArrayList<Service> serviceArrayList = new ArrayList<>();
+    private ListView serviceList, reviewList;
 
     @Nullable
     @Override
@@ -63,9 +66,41 @@ public class SalonViewFragment extends Fragment
         menPrice.setText(salon.maleAverage + "€");
 
         serviceList = view.findViewById(R.id.salon_services_list);
+        reviewList = view.findViewById(R.id.salon_reviews_list);
 
-        FirebaseFirestore dbSalonServices = FirebaseFirestore.getInstance();
-        dbSalonServices.collection("Services")
+
+        ImageButton edit_salon_btn = view.findViewById(R.id.edit_salon_btn);
+
+        edit_salon_btn.setVisibility(View.GONE);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user.getUid().equals(salon.createdUser)) edit_salon_btn.setVisibility(View.VISIBLE);
+
+        Log.d(TAG, "log in user: " + user.getUid());
+        Log.d(TAG, "salon user: " + salon.createdUser);
+
+
+        edit_salon_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                Bundle arguments = new Bundle();
+                arguments.putSerializable(Salon.class.getSimpleName(), salon);
+
+                AddEditSalonFragment addEditSalonFragment = new AddEditSalonFragment();
+                addEditSalonFragment.setArguments(arguments);
+
+                AppCompatActivity activity = (AppCompatActivity) v.getContext();
+                activity.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.user_fragment_container, addEditSalonFragment)
+                        .commit();
+            }
+        });
+
+        FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
+
+        dbQuery.collection("Services")
                 .whereEqualTo("salonId",salon.id)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -87,22 +122,28 @@ public class SalonViewFragment extends Fragment
                     }
                 });
 
-        Review review1 = new Review("The russian girl. Oh my, shave with knife....risky. joking i fell asleep. Great work", 3);
-        Review review2 = new Review("Great hairdressers, nice service and friendly people. Also there's a foosball table and some soft drinks are included in the price.", 4);
-        Review review3 = new Review("Excellent male barbershop with beautiful hairdressers", 5);
+        dbQuery.collection("Reviews")
+                .whereEqualTo("salonId", salon.id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList<Review> reviewArrayList = new ArrayList<>();
+                            for (QueryDocumentSnapshot review : task.getResult()) {
+                                Log.d(TAG, review.getId() + " => " + review.getData());
+                                reviewArrayList.add(new Review(review.get("comment").toString(), Integer.parseInt(review.get("rating").toString())));
+                            }
+                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(getActivity(), R.layout.review_list_item, reviewArrayList);
+                            reviewList.setAdapter(reviewListAdapter);
+                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
+                            lp.height = reviewArrayList.size() * 140;
+                            reviewList.setLayoutParams(lp);
 
-        ArrayList<Review> reviewArrayList = new ArrayList<>();
+                        }
+                    }
+                });
 
-        reviewArrayList.add(review1);
-        reviewArrayList.add(review2);
-        reviewArrayList.add(review3);
-
-        ReviewListAdapter reviewListAdapter = new ReviewListAdapter(getActivity(), R.layout.review_list_item, reviewArrayList);
-        ListView reviewList = view.findViewById(R.id.salon_reviews_list);
-        reviewList.setAdapter(reviewListAdapter);
-
-
-        Log.d(TAG, "onCreateView: " +  salon.toString());
 
         return view;
     }
