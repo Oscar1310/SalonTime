@@ -97,8 +97,8 @@ public class Salon implements Serializable {
         Date currentTime = Calendar.getInstance().getTime();
         Log.d(TAG, "Salon save: " + this.name);
 
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Salons");
-        mDatabase.child(this.id).setValue(this);
+//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Salons");
+//        mDatabase.child(this.id).setValue(this);
 
         Map<String, Object> saveSalon = new HashMap<>();
         saveSalon.put("name", this.name);

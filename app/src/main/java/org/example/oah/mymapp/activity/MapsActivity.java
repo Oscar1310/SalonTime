@@ -22,6 +22,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -47,6 +48,7 @@ import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.Review;
 import org.example.oah.mymapp.model.Salon;
 import org.example.oah.mymapp.model.Service;
+import org.example.oah.mymapp.model.UserFavoriteSalons;
 import org.example.oah.mymapp.utli.PermissionUtils;
 
 import java.util.ArrayList;
@@ -85,7 +87,8 @@ public class MapsActivity extends AppCompatActivity
 
     private ArrayList<Review> reviewArrayList;
 
-
+    private ImageView favorite_salon_btn;
+    private boolean isFavorite;
 
     /**
      * Flag indicating whether a requested permission has been denied after returning in
@@ -166,11 +169,21 @@ public class MapsActivity extends AppCompatActivity
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-//                                Log.d(TAG, document.getId() + " => " + document.getData());
 
-                                Salon salon = new Salon(document.getId(), document.get("name").toString(), document.get("description").toString(),
-                                        (double) document.get("locLat"), (double) document.get("locLang"), document.get("phoneNumber").toString(),
-                                        document.get("maleAverage").toString(), document.get("femaleAverage").toString()
+                                String name = (document.get("name")==null ? "" : document.get("name").toString());
+                                double lat = (document.get("locLat")==null ? 0 : (double) document.get("locLat"));
+                                double lan = (document.get("locLang")==null ? 0 : (double) document.get("locLang"));
+                                String phoneNumber = (document.get("phoneNumber")==null ? "" : document.get("phoneNumber").toString());
+                                String maleAverage = (document.get("maleAverage")==null ? "" : document.get("maleAverage").toString());
+                                String femaleAverage = (document.get("femaleAverage")==null ? "" : document.get("femaleAverage").toString());
+                                String createdUser = (document.get("createdUser")==null ? "" : document.get("createdUser").toString());
+                                String description = (document.get("description")==null ? "" : document.get("description").toString());
+                                String email = (document.get("email")==null ? "" : document.get("email").toString());
+                                String homePage = (document.get("homePage")==null ? "" : document.get("homePage").toString());
+
+                                final Salon salon = new Salon(document.getId(), name,
+                                        lat, lan, phoneNumber, maleAverage, femaleAverage,
+                                        createdUser, description, email, homePage
                                 );
 
                                 LatLng latLng = new LatLng(salon.locLat, salon.locLang);
@@ -186,6 +199,7 @@ public class MapsActivity extends AppCompatActivity
                                     @Override
                                     public void onInfoWindowClick(Marker marker)  {
                                         Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
+                                        isFavorite = false;
 
                                         markerSalon = (Salon) marker.getTag();
 
@@ -208,6 +222,7 @@ public class MapsActivity extends AppCompatActivity
 
                                         serviceList = dialog.findViewById(R.id.salon_services_list);
                                         reviewList = dialog.findViewById(R.id.salon_reviews_list);
+
 
                                         FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
 
@@ -298,6 +313,54 @@ public class MapsActivity extends AppCompatActivity
                                             }
                                         });
 
+
+                                        favorite_salon_btn = dialog.findViewById(R.id.favorite_salon_btn);
+                                        if (currentUser != null) {
+
+                                            Log.d(TAG, "USER: " + currentUser.getUid());
+                                            Log.d(TAG, "SALON: " + markerSalon.id);
+                                            dbQuery.collection("UserFavoriteSalons")
+                                                    .whereEqualTo("salonId", markerSalon.id)
+                                                    .whereEqualTo("userId", currentUser.getUid())
+                                                    .get()
+                                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                            if (task.isSuccessful()) {
+                                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                                                    Log.d(TAG, "_______________________________________________________________");
+                                                                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
+                                                                    isFavorite = true;
+                                                                }
+
+
+                                                            }
+                                                        }
+                                                    });
+                                        }
+
+                                        favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                if (isFavorite) {
+                                                    Log.d(TAG, "onClick: already favorite");
+                                                    Toast.makeText(MapsActivity.this, "Cant add to favorite, because salon is already added favorite",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                                else if (currentUser != null) {
+                                                    Log.d(TAG, "onClick: add favorite");
+                                                    UserFavoriteSalons userFavoriteSalons = new UserFavoriteSalons(markerSalon.id, currentUser.getUid());
+                                                    userFavoriteSalons.create();
+                                                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
+                                                    isFavorite = true;
+                                                } else {
+                                                    Log.d(TAG, "onClick: not logged id");
+                                                    Toast.makeText(MapsActivity.this, "Cant add to favorite.",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
 
                                     }
                                 });

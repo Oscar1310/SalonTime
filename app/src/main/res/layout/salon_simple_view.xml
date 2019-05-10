@@ -344,14 +344,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:text="@string/heading_text"
             android:textAlignment="viewStart"
             android:textColor="@color/primary_text"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/add_salon_favorite"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -383,15 +380,6 @@
             app:layout_constraintTop_toTopOf="@+id/ratingBar" />
 
         <ImageView
-            android:id="@+id/add_salon_favorite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/add_comment"
-            app:layout_constraintTop_toTopOf="@+id/add_comment"
-            app:srcCompat="@drawable/ic_bookmark" />
-
-        <ImageView
             android:id="@+id/add_comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -400,5 +388,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_rate_review_black_24dp" />
+
+        <ImageView
+            android:id="@+id/favorite_salon_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/add_comment"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_bookmark_empty" />
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

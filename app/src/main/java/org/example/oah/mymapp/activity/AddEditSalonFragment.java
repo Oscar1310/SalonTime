@@ -1,6 +1,7 @@
 package org.example.oah.mymapp.activity;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,8 +22,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firestore.v1beta1.WriteResult;
 
 import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.Salon;
@@ -50,13 +55,14 @@ public class AddEditSalonFragment extends Fragment
 
     Dialog dialog;
     ArrayList<Service> serviceArrayList = new ArrayList<>();
+    private View view;
 
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.create_salon_view, container, false);
+        view = inflater.inflate(R.layout.create_salon_view, container, false);
 
         Bundle arguments = getArguments();
 
@@ -74,9 +80,10 @@ public class AddEditSalonFragment extends Fragment
         femaleAveragePrice = view.findViewById(R.id.create_salon_female_avarge_price);
         salonHomepage = view.findViewById(R.id.create_salon_home_page);
         salonEmail = view.findViewById(R.id.create_salon_email);
-
-
         serviceList = view.findViewById(R.id.service_list);
+
+        Button delete_salon_btn = view.findViewById(R.id.delete_salon_btn);
+        delete_salon_btn.setVisibility(View.GONE);
 
         if(salon!=null) {
             salonName.setText(salon.name);
@@ -86,6 +93,39 @@ public class AddEditSalonFragment extends Fragment
             femaleAveragePrice.setText(salon.femaleAverage);
             salonHomepage.setText(salon.homePage);
             salonEmail.setText(salon.email);
+
+            delete_salon_btn.setVisibility(View.VISIBLE);
+            delete_salon_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
+
+                    dbQuery.collection("Salons")
+                            .document(salon.id)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Salon deleted!");
+
+                                    AppCompatActivity activity = (AppCompatActivity) view.getContext();
+                                    activity.getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.user_fragment_container, new SalonsListFragment())
+                                            .commit();
+
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting salon", e);
+                                }
+                            });
+
+                }
+            });
         }
 
         Button addService = view.findViewById(R.id.add_service_btn);
