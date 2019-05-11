@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ public class Salon implements Serializable {
 
         db.collection("Salons")
                 .document(this.id)
-                .set(saveSalon);
+                .set(saveSalon,  SetOptions.merge());
     }
 
     @Override

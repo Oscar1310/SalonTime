@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,6 +33,7 @@ import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.Review;
 import org.example.oah.mymapp.model.Salon;
 import org.example.oah.mymapp.model.Service;
+import org.example.oah.mymapp.model.UserFavoriteSalons;
 
 import java.util.ArrayList;
 
@@ -44,6 +46,11 @@ public class SalonViewFragment extends Fragment
     private Bundle arguments;
     private Salon salon;
     private ListView serviceList, reviewList;
+
+    private ImageButton favorite_salon_btn;
+    private FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private boolean isFavorite = false;
 
     @Nullable
     @Override
@@ -68,16 +75,52 @@ public class SalonViewFragment extends Fragment
         serviceList = view.findViewById(R.id.salon_services_list);
         reviewList = view.findViewById(R.id.salon_reviews_list);
 
-
         ImageButton edit_salon_btn = view.findViewById(R.id.edit_salon_btn);
 
         edit_salon_btn.setVisibility(View.GONE);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user.getUid().equals(salon.createdUser)) edit_salon_btn.setVisibility(View.VISIBLE);
 
         Log.d(TAG, "log in user: " + user.getUid());
         Log.d(TAG, "salon user: " + salon.createdUser);
 
+
+        favorite_salon_btn = view.findViewById(R.id.favorite_salon_btn);
+        dbQuery.collection("UserFavoriteSalons")
+                .whereEqualTo("salonId", salon.id)
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().size()>0) {
+                                favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
+                                isFavorite = true;
+                            }
+                        }
+                    }
+                });
+        favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isFavorite) {
+                    deleteFavorite();
+                    isFavorite = false;
+                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark_empty);
+                    Toast.makeText(getContext(), "Removed favorite",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d(TAG, "onClick: add favorite");
+                    UserFavoriteSalons userFavoriteSalons = new UserFavoriteSalons(salon.id, user.getUid());
+                    userFavoriteSalons.create();
+                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
+                    isFavorite = true;
+                    Toast.makeText(getContext(), "Add favorite",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
 
         edit_salon_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,8 +140,6 @@ public class SalonViewFragment extends Fragment
                         .commit();
             }
         });
-
-        FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
 
         dbQuery.collection("Services")
                 .whereEqualTo("salonId",salon.id)
@@ -164,5 +205,30 @@ public class SalonViewFragment extends Fragment
                 .title(salon.name));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
+    }
+
+    private void deleteFavorite() {
+        dbQuery.collection("UserFavoriteSalons")
+                .whereEqualTo("salonId", salon.id)
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList <String> deleteFavorites = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                deleteFavorites.add(document.getId());
+                            }
+
+                            for (String deleteId : deleteFavorites) {
+                                dbQuery.collection("UserFavoriteSalons")
+                                        .document(deleteId)
+                                        .delete();
+                            }
+
+                        }
+                    }
+                });
     }
 }

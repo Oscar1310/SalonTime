@@ -34,6 +34,7 @@ import org.example.oah.mymapp.model.Salon;
 import org.example.oah.mymapp.model.Service;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class AddEditSalonFragment extends Fragment
         implements OnMapReadyCallback {
@@ -50,11 +51,11 @@ public class AddEditSalonFragment extends Fragment
 
     private Salon salon;
 
-    TextView addServiceName, addServicePrice;
-    ListView serviceList;
+    private TextView addServiceName, addServicePrice;
+    private ListView serviceList;
 
-    Dialog dialog;
-    ArrayList<Service> serviceArrayList = new ArrayList<>();
+    private Dialog dialog;
+    private ArrayList<Service> serviceArrayList = new ArrayList<>();
     private View view;
 
 
@@ -211,11 +212,15 @@ public class AddEditSalonFragment extends Fragment
                 }
 
                 if (allOkeyForSaving) {
+                    //Log.d(TAG, "save: " + salon);
                     if (salon==null) {
-                        Salon salon = new Salon(name,salonLat, salonLon, phone,
+                        Log.d(TAG, "add new salon");
+                        salon = new Salon(UUID.randomUUID().toString(), name,
+                                salonLat, salonLon, phone,
                                 malePrice, femalePrice, createdUser,
-                                description, email,homePage
+                                description, email, homePage
                         );
+                        Log.d(TAG, "new salon: " + salon.toString());
                     } else {
                         salon.name = name;
                         salon.email = email;
@@ -269,7 +274,14 @@ public class AddEditSalonFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.436375, 24.756952), 15));
+        LatLng latLng;
+        if (salon!=null) {
+            latLng = new LatLng(salon.locLat, salon.locLang);
+        } else {
+            latLng = new LatLng(59.436375, 24.756952);
+        }
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         googleMap.getUiSettings().setAllGesturesEnabled(false);
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {

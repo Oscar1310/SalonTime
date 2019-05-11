@@ -398,5 +398,15 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_mode_edit_black_24dp" />
 
+        <ImageButton
+            android:id="@+id/favorite_salon_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/edit_salon_btn"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_bookmark_empty" />
+
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

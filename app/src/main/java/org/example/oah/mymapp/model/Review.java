@@ -64,4 +64,7 @@ public class Review implements Serializable {
     public void setRating(int rating) {
         this.rating = rating;
     }
+
 }
+
+

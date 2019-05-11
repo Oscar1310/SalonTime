@@ -18,6 +18,8 @@ public class UserActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Bundle bundle = new Bundle();
+            SalonsListFragment salonsListFragment;
             switch (item.getItemId()) {
                 case R.id.navigation_user:
                     getSupportFragmentManager()
@@ -27,16 +29,22 @@ public class UserActivity extends AppCompatActivity {
                     return true;
 
                 case R.id.navigation_favorite:
+                    salonsListFragment = new SalonsListFragment();
+                    bundle.putInt("listType", 2);
+                    salonsListFragment.setArguments(bundle);
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.user_fragment_container, new SalonsListFragment())
+                            .replace(R.id.user_fragment_container, salonsListFragment)
                             .commit();
                     return true;
 
                 case R.id.navigation_salons:
+                    salonsListFragment = new SalonsListFragment();
+                    bundle.putInt("listType", 1);
+                    salonsListFragment.setArguments(bundle);
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.user_fragment_container, new SalonsListFragment())
+                            .replace(R.id.user_fragment_container, salonsListFragment)
                             .commit();
                     return true;
 

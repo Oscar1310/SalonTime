@@ -52,6 +52,7 @@ import org.example.oah.mymapp.model.UserFavoriteSalons;
 import org.example.oah.mymapp.utli.PermissionUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MapsActivity extends AppCompatActivity
@@ -89,6 +90,12 @@ public class MapsActivity extends AppCompatActivity
 
     private ImageView favorite_salon_btn;
     private boolean isFavorite;
+    private FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
+
+    private RatingBar ratingBar ;
+    private TextView salon_reviews_count;
+
+
 
     /**
      * Flag indicating whether a requested permission has been denied after returning in
@@ -160,9 +167,7 @@ public class MapsActivity extends AppCompatActivity
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("Salons")
+        dbQuery.collection("Salons")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -186,184 +191,243 @@ public class MapsActivity extends AppCompatActivity
                                         createdUser, description, email, homePage
                                 );
 
-                                LatLng latLng = new LatLng(salon.locLat, salon.locLang);
-                                Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
-                                        .title(salon.name)
-                                        .snippet(salon.getMarkerData())
-                                );
-
-                                marker.setTag(salon);
-                                Log.d(TAG, document.getId() + " => " + salon.toString());
-
-                                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()  {
-                                    @Override
-                                    public void onInfoWindowClick(Marker marker)  {
-                                        Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
-                                        isFavorite = false;
-
-                                        markerSalon = (Salon) marker.getTag();
-
-                                        Dialog dialog = new Dialog(MapsActivity.this);
-                                        dialog.setContentView(R.layout.salon_simple_view);
-                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                                        dialog.show();
-
-                                        TextView heading = dialog.findViewById(R.id.salon_view_heading);
-                                        heading.setText(markerSalon.name);
-                                        TextView description = dialog.findViewById(R.id.salon_view_description);
-                                        description.setText(markerSalon.description);
-                                        TextView phone = dialog.findViewById(R.id.salon_view_phone);
-                                        phone.setText(markerSalon.phoneNumber);
-
-                                        TextView femalePrice = dialog.findViewById(R.id.salon_view_female_price);
-                                        femalePrice.setText(markerSalon.femaleAverage + "€");
-                                        TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
-                                        menPrice.setText(markerSalon.maleAverage + "€");
-
-                                        serviceList = dialog.findViewById(R.id.salon_services_list);
-                                        reviewList = dialog.findViewById(R.id.salon_reviews_list);
-
-
-                                        FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
-
-                                        dbQuery.collection("Services")
-                                                .whereEqualTo("salonId",markerSalon.id)
-                                                .get()
-                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            ArrayList<Service> serviceArrayList = new ArrayList<>();
-                                                            for (QueryDocumentSnapshot service : task.getResult()) {
-                                                                Log.d(TAG, service.getId() + " => " + service.getData());
-                                                                serviceArrayList.add(new Service(service.get("name").toString(), Double.parseDouble(service.get("price").toString())));
-                                                            }
-                                                            ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
-                                                            serviceList.setAdapter(serviceAdapter);
-                                                            ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
-                                                            lp.height = serviceArrayList.size() * 80;
-                                                            serviceList.setLayoutParams(lp);
-
-                                                        }
-                                                    }
-                                                });
-
-                                        dbQuery.collection("Reviews")
-                                                .whereEqualTo("salonId", markerSalon.id)
-                                                .get()
-                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            reviewArrayList = new ArrayList<>();
-                                                            for (QueryDocumentSnapshot review : task.getResult()) {
-                                                                Log.d(TAG, review.getId() + " => " + review.getData());
-                                                                reviewArrayList.add(new Review(review.get("comment").toString(), Integer.parseInt(review.get("rating").toString())));
-                                                            }
-                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
-                                                            reviewList.setAdapter(reviewListAdapter);
-                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
-                                                            lp.height = reviewArrayList.size() * 140;
-                                                            reviewList.setLayoutParams(lp);
-
-                                                        }
-                                                    }
-                                                });
-
-
-                                        ImageView add_comment = dialog.findViewById(R.id.add_comment);
-                                        add_comment.setOnClickListener(new View.OnClickListener(){
+                                dbQuery.collection("Reviews")
+                                        .whereEqualTo("salonId", salon.id)
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                             @Override
-                                            public void onClick(View v) {
-                                                if (currentUser == null) {
-                                                    //intent = new Intent(MapsActivity.this, LoginActivity.class);
-                                                    Toast.makeText(MapsActivity.this, "Please log in to rate salon", Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    rateSalonDialog = new Dialog(MapsActivity.this);
-                                                    rateSalonDialog.setContentView(R.layout.rate_salon_view);
-                                                    rateSalonDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-                                                    rateSalonDialog.show();
-
-                                                    salonReiting = rateSalonDialog.findViewById(R.id.salon_rating);
-                                                    salonComment = rateSalonDialog.findViewById(R.id.salon_comment);
-
-                                                    Button rate_salon_btn = rateSalonDialog.findViewById(R.id.rate_salon_btn);
-                                                    rate_salon_btn.setOnClickListener(new View.OnClickListener(){
-                                                        @Override
-                                                        public void onClick(View v) {
-                                                            Review review = new Review(salonComment.getText().toString(),
-                                                                    (int) salonReiting.getRating(),
-                                                                    markerSalon.id,
-                                                                    currentUser.getUid());
-
-                                                            review.create();
-
-                                                            reviewArrayList.add(0, review);
-                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
-                                                            reviewList.setAdapter(reviewListAdapter);
-                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
-                                                            lp.height = reviewArrayList.size() * 140;
-                                                            reviewList.setLayoutParams(lp);
-
-                                                            rateSalonDialog.cancel();
-
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    long sum = 0;
+                                                    int reiting = 0;
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                        if (document.get("rating")!=null) {
+                                                            Log.d(TAG, "onComplete: " + document.get("rating").getClass().getName());
+                                                            sum += (long) document.get("rating");
                                                         }
-                                                    });
-                                                }
-                                            }
-                                        });
+                                                    }
+
+                                                    if (task.getResult().size()!=0) {
+
+                                                        Log.d(TAG, "SUM: " + sum);
+                                                        Log.d(TAG, "Count: " + task.getResult().size());
+
+                                                        reiting = (int) Math.round((double) sum / (double) task.getResult().size() * 2 / 2.0);
+                                                    }
+
+                                                    String markerInfoField = "Female avg: " +  salon.femaleAverage + " € Male avg: " + salon.maleAverage + " € Raiting: 5/" + reiting;
 
 
-                                        favorite_salon_btn = dialog.findViewById(R.id.favorite_salon_btn);
-                                        if (currentUser != null) {
 
-                                            Log.d(TAG, "USER: " + currentUser.getUid());
-                                            Log.d(TAG, "SALON: " + markerSalon.id);
-                                            dbQuery.collection("UserFavoriteSalons")
-                                                    .whereEqualTo("salonId", markerSalon.id)
-                                                    .whereEqualTo("userId", currentUser.getUid())
-                                                    .get()
-                                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                                                    Log.d(TAG, "_______________________________________________________________");
+                                                    LatLng latLng = new LatLng(salon.locLat, salon.locLang);
+                                                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng)
+                                                            .title(salon.name)
+                                                            .snippet(markerInfoField)
+                                                    );
+
+                                                    marker.setTag(salon);
+
+                                                    mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()  {
+                                                    @Override
+                                                    public void onInfoWindowClick(Marker marker)  {
+                                                        Log.d(TAG, "onInfoWindowClick: called " + marker.getTag().toString());
+                                                        isFavorite = false;
+
+                                                        markerSalon = (Salon) marker.getTag();
+
+                                                        Dialog dialog = new Dialog(MapsActivity.this);
+                                                        dialog.setContentView(R.layout.salon_simple_view);
+                                                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+                                                        dialog.show();
+
+                                                        TextView heading = dialog.findViewById(R.id.salon_view_heading);
+                                                        heading.setText(markerSalon.name);
+                                                        TextView description = dialog.findViewById(R.id.salon_view_description);
+                                                        description.setText(markerSalon.description);
+                                                        TextView phone = dialog.findViewById(R.id.salon_view_phone);
+                                                        phone.setText(markerSalon.phoneNumber);
+
+                                                        TextView femalePrice = dialog.findViewById(R.id.salon_view_female_price);
+                                                        femalePrice.setText(markerSalon.femaleAverage + "€");
+                                                        TextView menPrice = dialog.findViewById(R.id.salon_view_men_price);
+                                                        menPrice.setText(markerSalon.maleAverage + "€");
+
+                                                        serviceList = dialog.findViewById(R.id.salon_services_list);
+                                                        reviewList = dialog.findViewById(R.id.salon_reviews_list);
+
+                                                        ratingBar = dialog.findViewById(R.id.ratingBar);
+                                                        salon_reviews_count = dialog.findViewById(R.id.salon_reviews_count);
+
+
+                                                        dbQuery.collection("Reviews")
+                                                                .whereEqualTo("salonId", markerSalon.id)
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            long sum = 0;
+                                                                            float reiting = 0;
+                                                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                                if (document.get("rating") != null) {
+                                                                                    Log.d(TAG, "onComplete: " + document.get("rating").getClass().getName());
+                                                                                    sum += (long) document.get("rating");
+                                                                                }
+                                                                            }
+
+                                                                            if (task.getResult().size() != 0) {
+
+                                                                                Log.d(TAG, "SUM: " + sum);
+                                                                                Log.d(TAG, "Count: " + task.getResult().size());
+
+                                                                                reiting = (float) Math.round((double) sum / (double) task.getResult().size() * 2 / 2.0);
+
+                                                                                salon_reviews_count.setText(task.getResult().size() + " Reviews");
+                                                                            }
+                                                                            ratingBar.setRating(reiting);
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                        dbQuery.collection("Services")
+                                                                .whereEqualTo("salonId",markerSalon.id)
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            ArrayList<Service> serviceArrayList = new ArrayList<>();
+                                                                            for (QueryDocumentSnapshot service : task.getResult()) {
+                                                                                Log.d(TAG, service.getId() + " => " + service.getData());
+                                                                                serviceArrayList.add(new Service(service.get("name").toString(), Double.parseDouble(service.get("price").toString())));
+                                                                            }
+                                                                            ServiceListAdapter serviceAdapter = new ServiceListAdapter(MapsActivity.this, R.layout.services_list_item, serviceArrayList);
+                                                                            serviceList.setAdapter(serviceAdapter);
+                                                                            ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
+                                                                            lp.height = serviceArrayList.size() * 80;
+                                                                            serviceList.setLayoutParams(lp);
+
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                        dbQuery.collection("Reviews")
+                                                                .whereEqualTo("salonId", markerSalon.id)
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            reviewArrayList = new ArrayList<>();
+                                                                            for (QueryDocumentSnapshot review : task.getResult()) {
+                                                                                Log.d(TAG, review.getId() + " => " + review.getData());
+                                                                                reviewArrayList.add(new Review(review.get("comment").toString(), Integer.parseInt(review.get("rating").toString())));
+                                                                            }
+                                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+                                                                            reviewList.setAdapter(reviewListAdapter);
+                                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
+                                                                            lp.height = reviewArrayList.size() * 140;
+                                                                            reviewList.setLayoutParams(lp);
+
+                                                                        }
+                                                                    }
+                                                                });
+
+
+                                                        ImageView add_comment = dialog.findViewById(R.id.add_comment);
+                                                        add_comment.setOnClickListener(new View.OnClickListener(){
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                if (currentUser == null) {
+                                                                    //intent = new Intent(MapsActivity.this, LoginActivity.class);
+                                                                    Toast.makeText(MapsActivity.this, "Please log in to rate salon", Toast.LENGTH_SHORT).show();
+                                                                } else {
+                                                                    rateSalonDialog = new Dialog(MapsActivity.this);
+                                                                    rateSalonDialog.setContentView(R.layout.rate_salon_view);
+                                                                    rateSalonDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                                                                    rateSalonDialog.show();
+
+                                                                    salonReiting = rateSalonDialog.findViewById(R.id.salon_rating);
+                                                                    salonComment = rateSalonDialog.findViewById(R.id.salon_comment);
+
+                                                                    Button rate_salon_btn = rateSalonDialog.findViewById(R.id.rate_salon_btn);
+                                                                    rate_salon_btn.setOnClickListener(new View.OnClickListener(){
+                                                                        @Override
+                                                                        public void onClick(View v) {
+                                                                            Review review = new Review(salonComment.getText().toString(),
+                                                                                    (int) salonReiting.getRating(),
+                                                                                    markerSalon.id,
+                                                                                    currentUser.getUid());
+
+                                                                            review.create();
+
+                                                                            reviewArrayList.add(0, review);
+                                                                            ReviewListAdapter reviewListAdapter = new ReviewListAdapter(MapsActivity.this, R.layout.review_list_item, reviewArrayList);
+                                                                            reviewList.setAdapter(reviewListAdapter);
+                                                                            ViewGroup.LayoutParams lp = reviewList.getLayoutParams();
+                                                                            lp.height = reviewArrayList.size() * 140;
+                                                                            reviewList.setLayoutParams(lp);
+
+                                                                            rateSalonDialog.cancel();
+
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+
+
+                                                        favorite_salon_btn = dialog.findViewById(R.id.favorite_salon_btn);
+                                                        if (currentUser != null) {
+
+                                                            dbQuery.collection("UserFavoriteSalons")
+                                                                    .whereEqualTo("salonId", markerSalon.id)
+                                                                    .whereEqualTo("userId", currentUser.getUid())
+                                                                    .get()
+                                                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                            if (task.isSuccessful()) {
+                                                                                if (task.getResult().size()>0) {
+                                                                                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
+                                                                                    isFavorite = true;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+                                                        }
+
+                                                        favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                if (isFavorite) {
+                                                                    deleteFavorite();
+                                                                    isFavorite = false;
+                                                                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark_empty);
+                                                                    Toast.makeText(MapsActivity.this, "Removed favorite",
+                                                                            Toast.LENGTH_SHORT).show();
+                                                                }
+                                                                else if (currentUser != null) {
+                                                                    Log.d(TAG, "onClick: add favorite");
+                                                                    UserFavoriteSalons userFavoriteSalons = new UserFavoriteSalons(markerSalon.id, currentUser.getUid());
+                                                                    userFavoriteSalons.create();
                                                                     favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
                                                                     isFavorite = true;
+                                                                    Toast.makeText(MapsActivity.this, "Add favorite",
+                                                                            Toast.LENGTH_SHORT).show();
+                                                                } else {
+                                                                    Log.d(TAG, "onClick: not logged id");
+                                                                    Toast.makeText(MapsActivity.this, "Cant add to favorite, you need to log in.",
+                                                                            Toast.LENGTH_SHORT).show();
                                                                 }
-
-
                                                             }
-                                                        }
-                                                    });
-                                        }
+                                                        });
 
-                                        favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                if (isFavorite) {
-                                                    Log.d(TAG, "onClick: already favorite");
-                                                    Toast.makeText(MapsActivity.this, "Cant add to favorite, because salon is already added favorite",
-                                                            Toast.LENGTH_SHORT).show();
-                                                }
-                                                else if (currentUser != null) {
-                                                    Log.d(TAG, "onClick: add favorite");
-                                                    UserFavoriteSalons userFavoriteSalons = new UserFavoriteSalons(markerSalon.id, currentUser.getUid());
-                                                    userFavoriteSalons.create();
-                                                    favorite_salon_btn.setImageResource(R.drawable.ic_bookmark);
-                                                    isFavorite = true;
-                                                } else {
-                                                    Log.d(TAG, "onClick: not logged id");
-                                                    Toast.makeText(MapsActivity.this, "Cant add to favorite.",
-                                                            Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
                                                 }
                                             }
                                         });
-
-                                    }
-                                });
                             }
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
@@ -371,6 +435,31 @@ public class MapsActivity extends AppCompatActivity
                     }
                 });
 
+    }
+
+    private void deleteFavorite() {
+        dbQuery.collection("UserFavoriteSalons")
+                .whereEqualTo("salonId", markerSalon.id)
+                .whereEqualTo("userId", currentUser.getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList <String> deleteFavorites = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                deleteFavorites.add(document.getId());
+                            }
+
+                            for (String deleteId : deleteFavorites) {
+                                dbQuery.collection("UserFavoriteSalons")
+                                        .document(deleteId)
+                                        .delete();
+                            }
+
+                        }
+                    }
+                });
     }
 
     /**
@@ -467,6 +556,5 @@ public class MapsActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
 
 }
