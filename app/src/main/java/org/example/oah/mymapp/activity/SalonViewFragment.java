@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,9 @@ public class SalonViewFragment extends Fragment
     private FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private boolean isFavorite = false;
+
+    private RatingBar ratingBar;
+    private TextView salon_reviews_count;
 
     @Nullable
     @Override
@@ -121,6 +125,39 @@ public class SalonViewFragment extends Fragment
 
             }
         });
+
+        ratingBar = view.findViewById(R.id.ratingBar);
+        salon_reviews_count = view.findViewById(R.id.salon_reviews_count);
+
+        dbQuery.collection("Reviews")
+                .whereEqualTo("salonId", salon.id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            long sum = 0;
+                            float reiting = 0;
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                if (document.get("rating") != null) {
+                                    Log.d(TAG, "onComplete: " + document.get("rating").getClass().getName());
+                                    sum += (long) document.get("rating");
+                                }
+                            }
+
+                            if (task.getResult().size() != 0) {
+
+                                Log.d(TAG, "SUM: " + sum);
+                                Log.d(TAG, "Count: " + task.getResult().size());
+
+                                reiting = (float) Math.round((double) sum / (double) task.getResult().size() * 2 / 2.0);
+
+                                salon_reviews_count.setText(task.getResult().size() + " Reviews");
+                            }
+                            ratingBar.setRating(reiting);
+                        }
+                    }
+                });
 
         edit_salon_btn.setOnClickListener(new View.OnClickListener() {
             @Override
