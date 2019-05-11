@@ -190,7 +190,7 @@ public class AddEditSalonFragment extends Fragment
                 String malePrice = salonMaleAveragPrice.getText().toString();
                 String femalePrice = femaleAveragePrice.getText().toString();
                 String homePage = salonHomepage.getText().toString();
-                String email = salonHomepage.getText().toString();
+                String email = salonEmail.getText().toString();
 
                 Boolean allOkeyForSaving = true;
 

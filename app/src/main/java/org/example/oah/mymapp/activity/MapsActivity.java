@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -258,7 +259,6 @@ public class MapsActivity extends AppCompatActivity
                                                         ratingBar = dialog.findViewById(R.id.ratingBar);
                                                         salon_reviews_count = dialog.findViewById(R.id.salon_reviews_count);
 
-
                                                         dbQuery.collection("Reviews")
                                                                 .whereEqualTo("salonId", markerSalon.id)
                                                                 .get()
@@ -396,6 +396,49 @@ public class MapsActivity extends AppCompatActivity
                                                                         }
                                                                     });
                                                         }
+
+                                                        TextView salon_view_phone = dialog.findViewById(R.id.salon_view_phone);
+                                                        if (!markerSalon.phoneNumber.equals("")){
+                                                            salon_view_phone.setOnClickListener(new View.OnClickListener(){
+                                                                @Override
+                                                                public void onClick(View v) {
+                                                                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                                                                    intent.setData(Uri.parse("tel:" + markerSalon.phoneNumber));
+                                                                    startActivity(intent);
+                                                                }
+                                                            });
+                                                        }
+                                                        TextView salon_view_email = dialog.findViewById(R.id.salon_view_email);
+                                                        if (!markerSalon.email.equals("")){
+                                                            salon_view_email.setOnClickListener(new View.OnClickListener(){
+                                                                @Override
+                                                                public void onClick(View v) {
+                                                                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                                                                    intent.setData(Uri.parse("mailto:" + markerSalon.email));
+                                                                    startActivity(intent);
+                                                                }
+                                                            });
+                                                        } else {
+                                                            Toast.makeText(MapsActivity.this, "No email address",
+                                                                    Toast.LENGTH_SHORT).show();
+                                                        }
+
+                                                        TextView salon_view_website = dialog.findViewById(R.id.salon_view_website);
+                                                        if (!markerSalon.homePage.equals("")){
+                                                            salon_view_website.setOnClickListener(new View.OnClickListener(){
+                                                                @Override
+                                                                public void onClick(View v) {
+                                                                    Uri uri = Uri.parse("http://" + markerSalon.homePage); // missing 'http://' will cause crashed
+                                                                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                                                    startActivity(intent);
+
+                                                                }
+                                                            });
+                                                        } else {
+                                                            Toast.makeText(MapsActivity.this, "No web page",
+                                                                    Toast.LENGTH_SHORT).show();
+                                                        }
+
 
                                                         favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
                                                             @Override

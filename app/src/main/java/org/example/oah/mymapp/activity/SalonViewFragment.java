@@ -1,5 +1,7 @@
 package org.example.oah.mymapp.activity;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -158,6 +160,49 @@ public class SalonViewFragment extends Fragment
                         }
                     }
                 });
+
+        TextView salon_view_phone = view.findViewById(R.id.salon_view_phone);
+        if (!salon.phoneNumber.equals("")){
+            salon_view_phone.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + salon.phoneNumber));
+                    startActivity(intent);
+                }
+            });
+        }
+        TextView salon_view_email = view.findViewById(R.id.salon_view_email);
+        if (!salon.email.equals("")){
+            salon_view_email.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:" + salon.email));
+                    startActivity(intent);
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "No email address",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        TextView salon_view_website = view.findViewById(R.id.salon_view_website);
+        if (!salon.homePage.equals("")){
+            salon_view_website.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse("http://" + salon.homePage); // missing 'http://' will cause crashed
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "No web page",
+                    Toast.LENGTH_SHORT).show();
+        }
+
 
         edit_salon_btn.setOnClickListener(new View.OnClickListener() {
             @Override
