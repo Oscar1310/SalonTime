@@ -1,7 +1,5 @@
 package org.example.oah.mymapp.model;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
@@ -48,16 +46,11 @@ public class User {
     }
 
     public void save() {
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("Users");
-        mDatabase.child(this.id).setValue(this);
-
         Date currentTime = Calendar.getInstance().getTime();
         Map<String, Object> createUser = new HashMap<>();
         createUser.put("name", this.name);
         createUser.put("email", this.email);
         createUser.put("createDate", currentTime);
-
-
         db.collection("Users")
                 .document(this.id)
                 .set(createUser);
@@ -67,7 +60,6 @@ public class User {
         Map<String, Object> changeUser = new HashMap<>();
         changeUser.put("name", this.name);
         changeUser.put("email", this.email);
-
         db.collection("Users")
                 .document(this.id)
                 .update(changeUser);

@@ -162,9 +162,8 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMyLocationClickListener(this);
         enableMyLocation();
 
-        // 59.436375  24.756952 viru
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.436375,24.756952),15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.436375,24.756952),4));
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
 
@@ -396,7 +395,6 @@ public class MapsActivity extends AppCompatActivity
                                                                         }
                                                                     });
                                                         }
-
                                                         TextView salon_view_phone = dialog.findViewById(R.id.salon_view_phone);
                                                         if (!markerSalon.phoneNumber.equals("")){
                                                             salon_view_phone.setOnClickListener(new View.OnClickListener(){
@@ -409,36 +407,34 @@ public class MapsActivity extends AppCompatActivity
                                                             });
                                                         }
                                                         TextView salon_view_email = dialog.findViewById(R.id.salon_view_email);
-                                                        if (!markerSalon.email.equals("")){
-                                                            salon_view_email.setOnClickListener(new View.OnClickListener(){
-                                                                @Override
-                                                                public void onClick(View v) {
+                                                        salon_view_email.setOnClickListener(new View.OnClickListener(){
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                if (!markerSalon.email.equals("")) {
                                                                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                                                                     intent.setData(Uri.parse("mailto:" + markerSalon.email));
                                                                     startActivity(intent);
+                                                                } else {
+                                                                    Toast.makeText(MapsActivity.this, "No email address",
+                                                                            Toast.LENGTH_SHORT).show();
                                                                 }
-                                                            });
-                                                        } else {
-                                                            Toast.makeText(MapsActivity.this, "No email address",
-                                                                    Toast.LENGTH_SHORT).show();
-                                                        }
 
+                                                            }
+                                                        });
                                                         TextView salon_view_website = dialog.findViewById(R.id.salon_view_website);
-                                                        if (!markerSalon.homePage.equals("")){
-                                                            salon_view_website.setOnClickListener(new View.OnClickListener(){
-                                                                @Override
-                                                                public void onClick(View v) {
+                                                        salon_view_website.setOnClickListener(new View.OnClickListener(){
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                if (!markerSalon.homePage.equals("")) {
                                                                     Uri uri = Uri.parse("http://" + markerSalon.homePage); // missing 'http://' will cause crashed
                                                                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                                                     startActivity(intent);
-
+                                                                } else {
+                                                                    Toast.makeText(MapsActivity.this, "No web page",
+                                                                            Toast.LENGTH_SHORT).show();
                                                                 }
-                                                            });
-                                                        } else {
-                                                            Toast.makeText(MapsActivity.this, "No web page",
-                                                                    Toast.LENGTH_SHORT).show();
-                                                        }
-
+                                                            }
+                                                        });
 
                                                         favorite_salon_btn.setOnClickListener(new View.OnClickListener() {
                                                             @Override
@@ -522,7 +518,6 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
@@ -530,7 +525,7 @@ public class MapsActivity extends AppCompatActivity
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+
     }
 
     @Override

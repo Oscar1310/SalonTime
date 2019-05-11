@@ -22,11 +22,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firestore.v1beta1.WriteResult;
 
 import org.example.oah.mymapp.R;
@@ -56,8 +60,9 @@ public class AddEditSalonFragment extends Fragment
 
     private Dialog dialog;
     private ArrayList<Service> serviceArrayList = new ArrayList<>();
+    private ArrayList<Service> addServiceArrayList = new ArrayList<>();
     private View view;
-
+    private FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
 
     @Nullable
     @Override
@@ -99,9 +104,6 @@ public class AddEditSalonFragment extends Fragment
             delete_salon_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
-
                     dbQuery.collection("Salons")
                             .document(salon.id)
                             .delete()
@@ -127,7 +129,29 @@ public class AddEditSalonFragment extends Fragment
 
                 }
             });
+
+            dbQuery.collection("Services")
+                    .whereEqualTo("salonId",salon.id)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot service : task.getResult()) {
+                                    Log.d(TAG, service.getId() + " => " + service.getData());
+                                    serviceArrayList.add(new Service(service.get("name").toString(), Double.parseDouble(service.get("price").toString())));
+                                }
+                                ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
+                                serviceList.setAdapter(serviceAdapter);
+                                ViewGroup.LayoutParams lp = serviceList.getLayoutParams();
+                                lp.height = serviceArrayList.size() * 80;
+                                serviceList.setLayoutParams(lp);
+
+                            }
+                        }
+                    });
         }
+
 
         Button addService = view.findViewById(R.id.add_service_btn);
         addService.setOnClickListener(new View.OnClickListener(){
@@ -150,8 +174,9 @@ public class AddEditSalonFragment extends Fragment
                     @Override
                     public void onClick(View v) {
                         Log.d(TAG, "onClick: add service");
-
-                        serviceArrayList.add(new Service(addServiceName.getText().toString(), Double.parseDouble(addServicePrice.getText().toString())));
+                        Service service = new Service(addServiceName.getText().toString(), Double.parseDouble(addServicePrice.getText().toString()));
+                        addServiceArrayList.add(service);
+                        serviceArrayList.add(service);
                         ServiceListAdapter serviceAdapter = new ServiceListAdapter(getActivity(), R.layout.services_list_item, serviceArrayList);
                         serviceList.setAdapter(serviceAdapter);
 
@@ -236,7 +261,7 @@ public class AddEditSalonFragment extends Fragment
 
                     salon.create();
 
-                    for (Service service : serviceArrayList) {
+                    for (Service service : addServiceArrayList) {
                         Service addService = new Service(service.getName(), salon.id, service.getPrice());
                         addService.create();
                     }

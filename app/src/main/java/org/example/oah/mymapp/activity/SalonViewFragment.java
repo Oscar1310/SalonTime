@@ -62,7 +62,7 @@ public class SalonViewFragment extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.salon_view, container, false);
+        final View view = inflater.inflate(R.layout.salon_view, container, false);
 
         salon = (Salon) getArguments().getSerializable(Salon.class.getSimpleName());
 
@@ -148,13 +148,8 @@ public class SalonViewFragment extends Fragment
                             }
 
                             if (task.getResult().size() != 0) {
-
-                                Log.d(TAG, "SUM: " + sum);
-                                Log.d(TAG, "Count: " + task.getResult().size());
-
                                 reiting = (float) Math.round((double) sum / (double) task.getResult().size() * 2 / 2.0);
-
-                                salon_reviews_count.setText(task.getResult().size() + " Reviews");
+                                salon_reviews_count.setText(task.getResult().size() + " Review");
                             }
                             ratingBar.setRating(reiting);
                         }
@@ -173,48 +168,44 @@ public class SalonViewFragment extends Fragment
             });
         }
         TextView salon_view_email = view.findViewById(R.id.salon_view_email);
-        if (!salon.email.equals("")){
-            salon_view_email.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
+        salon_view_email.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if (!salon.email.equals("")) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:" + salon.email));
                     startActivity(intent);
+                } else {
+                    Toast.makeText(getContext(), "No email address",
+                            Toast.LENGTH_SHORT).show();
                 }
-            });
-        } else {
-            Toast.makeText(getContext(), "No email address",
-                    Toast.LENGTH_SHORT).show();
-        }
+
+            }
+        });
 
         TextView salon_view_website = view.findViewById(R.id.salon_view_website);
-        if (!salon.homePage.equals("")){
-            salon_view_website.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
+        salon_view_website.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if (!salon.homePage.equals("")) {
                     Uri uri = Uri.parse("http://" + salon.homePage); // missing 'http://' will cause crashed
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
-
+                } else {
+                    Toast.makeText(getContext(), "No web page",
+                            Toast.LENGTH_SHORT).show();
                 }
-            });
-        } else {
-            Toast.makeText(getContext(), "No web page",
-                    Toast.LENGTH_SHORT).show();
-        }
-
+            }
+        });
 
         edit_salon_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
+                view.setVisibility(View.GONE);
                 Bundle arguments = new Bundle();
                 arguments.putSerializable(Salon.class.getSimpleName(), salon);
-
                 AddEditSalonFragment addEditSalonFragment = new AddEditSalonFragment();
                 addEditSalonFragment.setArguments(arguments);
-
                 AppCompatActivity activity = (AppCompatActivity) v.getContext();
                 activity.getSupportFragmentManager()
                         .beginTransaction()

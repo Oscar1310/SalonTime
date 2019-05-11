@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,6 +24,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.example.oah.mymapp.R;
 import org.example.oah.mymapp.model.User;
@@ -29,11 +34,12 @@ import org.example.oah.mymapp.model.User;
 public class UserViewFragment extends Fragment {
     private static final String TAG = "UserViewFragment";
 
-    TextView nameField, emailField, editName, editEmail;
-    FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    FirebaseUser currentUser;
-    String name, email;
-    User user;
+    private TextView nameField, emailField, editName, editEmail;
+    private FirebaseFirestore dbQuery = FirebaseFirestore.getInstance();
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser currentUser;
+    private String name, email;
+    private User user;
 
     @Nullable
     @Override
@@ -46,8 +52,30 @@ public class UserViewFragment extends Fragment {
         nameField = view.findViewById(R.id.user_name);
         emailField = view.findViewById(R.id.user_email);
 
-        ImageView editname = view.findViewById(R.id.edit_name_btn);
 
+        dbQuery.collection("Users")
+                .document(currentUser.getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                user = new User(document.getId(), document.get("name").toString(), document.get("email").toString());
+                                nameField.setText(user.getName());
+                                emailField.setText(user.getEmail());
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+
+
+        ImageView editname = view.findViewById(R.id.edit_name_btn);
         editname.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,42 +150,6 @@ public class UserViewFragment extends Fragment {
                 dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
                 dialog.show();
 
-            }
-        });
-
-
-
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("Users").child(currentUser.getUid());
-
-        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-
-                    Log.d(TAG, "KEY: " + child.getKey());
-                    Log.d(TAG, "VALUE: " + child.getValue());
-
-                    if (child.getKey().equals("name")) {
-                        name = child.getValue().toString();
-                        nameField.setText(name);
-                    }
-
-                    if (child.getKey().equals("email")) {
-                        email = child.getValue().toString();
-                        emailField.setText(email);
-                    }
-
-                }
-                user = new User(currentUser.getUid(), name, email);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
 
